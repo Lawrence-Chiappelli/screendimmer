@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Screen Dimmer
+Comment=A tray app that dims your monitors
+Exec=/usr/bin/screendimmer
+Icon=screendimmer
+Terminal=false
+StartupNotify=true
+Categories=Utility
+GenericName=Screen Dimmer
+Hidden=false
+Keywords=screen;dimmer;desktop;brightness
