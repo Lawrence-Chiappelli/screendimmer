@@ -18,7 +18,7 @@ except Exception as generic_exception:
     sys.exit()
 
 
-def apply_brightness(brightness_level: str):
+def apply_brightness(brightness_level: str, save=True):
 
     """
     :param brightness_level: The brightness
@@ -26,14 +26,17 @@ def apply_brightness(brightness_level: str):
     the operating system level.
     Is string to accommodate bash-level
     commands.
+    :param save: save these changes
+    to the config?
     :return: None
     """
 
     print(f"Current level: {brightness_level}")
 
     # Apply changes to config
-    config['brightness']['level'] = brightness_level
-    configutil.save_changes()
+    if save:
+        config['brightness']['level'] = brightness_level
+        configutil.save_changes()
 
     # Run changes on system
     if platform.system() == "Linux":

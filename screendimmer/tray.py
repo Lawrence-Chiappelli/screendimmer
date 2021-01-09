@@ -87,7 +87,11 @@ class Tray(QSystemTrayIcon):
         self.misc.triggered.connect(self._open_link)
 
         # Quit connection
-        self.terminator.triggered.connect(sys.exit)
+        self.terminator.triggered.connect(self._quit)
+
+    def _quit(self):
+        xrandr.apply_brightness('1.0', False)
+        sys.exit()
 
     def _open_link(self):
         url = "https://www.paypal.com/donate?hosted_button_id=YUU33PC5DC592"
