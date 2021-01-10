@@ -1,13 +1,6 @@
 import configparser
 from screendimmer import utils
 
-"""
-Two types of config paths:
-    1) current root directory
-    2) /etc/$pkgname (Linux)
-"""
-
-
 file = utils.get_config_path()
 config = configparser.ConfigParser()
 

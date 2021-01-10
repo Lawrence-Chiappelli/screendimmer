@@ -2,6 +2,7 @@
 import os
 import sys
 import platform
+import setup
 from screendimmer import configutil, xrandr, utils
 from screeninfo import get_monitors
 from PyQt5.QtGui import QIcon
@@ -104,7 +105,7 @@ class Tray(QSystemTrayIcon):
 
     def _popup(self):
         self.popup = QMessageBox()
-        self.popup.setWindowTitle(f"About - Screendimmer Ver. 0.1.0")
+        self.popup.setWindowTitle(f"About - {setup.config['Name']} Ver. {setup.config['Version']}")
         self.popup.setIcon(QMessageBox.Information)
         self.popup.setText("© 2021 Lawrence Chiappelli. All Rights Reserved.")
         github_link = "<a href='https://github.com/Lawrence-Chiappelli/screendimmer'>View on GitHub</a><br><br>"
