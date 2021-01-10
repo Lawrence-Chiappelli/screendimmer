@@ -5,11 +5,12 @@ with open("README.md") as f:
 
 setup(
     name="screendimmer",
-    version='0.1.0',
+    version='0.2.1',
     description='A tray application designed to dim the brightness of your monitors',
     license="MIT",
     long_description=long_description,
-    author='Lawrence C',
+    long_description_content_type="text/markdown",
+    author='Lawrence Chiappelli',
     author_email='lawrencechip@protonmail.com',
     url='https://github.com/lawrence-chiappelli/screen-dimmer',
     packages=['screendimmer'],
