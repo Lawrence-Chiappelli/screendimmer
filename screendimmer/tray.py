@@ -2,13 +2,13 @@
 import os
 import sys
 import platform
-import setup
-from screendimmer import configutil, xrandr, utils
+from screendimmer import configutil, configappdata, xrandr, utils
 from screeninfo import get_monitors
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 
 config = configutil.get_parsed_config()
+config_app = configappdata.get_application_metadata(False)
 
 
 class Tray(QSystemTrayIcon):
@@ -105,7 +105,7 @@ class Tray(QSystemTrayIcon):
 
     def _popup(self):
         self.popup = QMessageBox()
-        self.popup.setWindowTitle(f"About - {setup.config['Name']} Ver. {setup.config['Version']}")
+        self.popup.setWindowTitle(f"About - {config_app['Desktop Entry']['Name']} Ver. {config_app['Desktop Entry']['Version']}")
         self.popup.setIcon(QMessageBox.Information)
         self.popup.setText("© 2021 Lawrence Chiappelli. All Rights Reserved.")
         github_link = "<a href='https://github.com/Lawrence-Chiappelli/screendimmer'>View on GitHub</a><br><br>"

@@ -32,7 +32,7 @@ def get_desktop_path():
     """
 
     raw_file_name = 'screendimmer.desktop'
-    linux_path = f'/usr/share/applications/screendimmer/{raw_file_name}'
+    linux_path = f'/usr/share/applications/{raw_file_name}'
 
     if platform.system() == "Linux" and path.exists(linux_path) and not running_from_pycharm():
         print(f"Desktop file path: {linux_path}")
