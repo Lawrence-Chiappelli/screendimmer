@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 print("\nWelcome!")
 
-import utils
 import sys
-import configutil
-import xrandr
 import traceback
 from PyQt5.QtCore import QEvent
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import *
 from screeninfo import get_monitors
+
+try:
+    import utils, configutil, xrandr
+except ImportError:
+    from screendimmer import utils, configutil, xrandr
 
 config = configutil.get_parsed_config()
 config_app = utils.get_desktop_file_metadata()
