@@ -126,7 +126,7 @@ def get_desktop_path():
 @sys_env_checker
 def get_icon_path():
 
-    file_name = "screendimmer.png"
+    file_name = "resources/screendimmer.png"
     icon_path_production = f"/usr/share/pixmaps/{file_name}"
 
     if path.exists(icon_path_production):
