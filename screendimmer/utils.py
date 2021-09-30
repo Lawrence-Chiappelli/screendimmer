@@ -118,7 +118,7 @@ def get_desktop_path():
 @sys_env_checker
 def get_icon_path():
 
-    file_name = "resources/screendimmer.png"
+    file_name = "screendimmer.png"
     icon_path_production = f"/usr/share/pixmaps/{file_name}"
 
     if path.exists(icon_path_production):
@@ -126,9 +126,6 @@ def get_icon_path():
         return icon_path_production
     else:
         print(f"x - Unable to find {file_name} file from path {icon_path_production}. Using local file.")
-
-    if path.exists(f"resources/{file_name}"):
-        return f"resources/{file_name}"
 
     return f"../resources/{file_name}"  # Implies that users are cd'd into root directory of tray.py
 

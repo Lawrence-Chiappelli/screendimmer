@@ -5,6 +5,7 @@ import sys
 import traceback
 from PyQt5.QtCore import QEvent
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QApplication
 from screeninfo import get_monitors
 
 try:
