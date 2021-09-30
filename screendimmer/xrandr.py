@@ -1,24 +1,12 @@
-import sys
 import platform
 import subprocess
-from screendimmer import configutil
+
 from screeninfo import get_monitors
 
 monitor_names = [monitor.name for monitor in get_monitors()]
 
-try:
-    config = configutil.get_parsed_config()
-except PermissionError as pe:
-    # TODO: Prompts for permission error
-    print(f"Permission error: {pe}")
-    sys.exit()
-except Exception as generic_exception:
-    # TODO: Prompts for generic exception
-    print(f"Generic exception caught!: {generic_exception}")
-    sys.exit()
 
-
-def apply_brightness(brightness_level: str, save=True):
+def apply_brightness(brightness_level):
 
     """
     :param brightness_level: The brightness
@@ -26,17 +14,11 @@ def apply_brightness(brightness_level: str, save=True):
     the operating system level.
     Is string to accommodate bash-level
     commands.
-    :param save: save these changes
-    to the config?
-    :return: None
+    :return: True if want to save
+    False otherwise
     """
 
-    print(f"Current level: {brightness_level}")
-
-    # Apply changes to config
-    if save:
-        config['brightness']['level'] = brightness_level
-        configutil.save_changes()
+    print(f"Brightness level: {brightness_level}", end='')
 
     # Run changes on system
     if platform.system() == "Linux":
@@ -44,9 +26,8 @@ def apply_brightness(brightness_level: str, save=True):
         for monitor in monitor_names:
             bashCommand = f"xrandr --output {monitor} --brightness {brightness_level}"
             subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    else:
-        # TODO: maybe?
-        print(f"Not sure yet what to do on some other OS")
+            print(f" -> Applied to {monitor}", end='')
+        print("")
 
 
 def convert_label_to_xrandr(label_text: str):
@@ -82,7 +63,7 @@ def convert_xrandr_to_index(xrandr_val: float):
 def increment():
 
     """
-    Increment the brightness by exactly 1 point.
+    Increment the brightness by exactly 0.1 point.
     Currently unused, but useful for testing or
     future expansion.
     :return: None
@@ -99,7 +80,7 @@ def increment():
 def decrement():
 
     """
-    Decrement the brightness by exactly 1 point.
+    Decrement the brightness by exactly 0.1 point.
     Currently unused, but useful for testing or
     future expansion.
     :return: None
@@ -111,3 +92,4 @@ def decrement():
     else:
         new_value = "{:.1f}".format(val - 0.1)
         apply_brightness(new_value)
+

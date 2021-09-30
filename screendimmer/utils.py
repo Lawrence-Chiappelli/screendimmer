@@ -1,20 +1,94 @@
+import os
+import sys
 import platform
-from os import path, getenv
+import configparser
+from os import path
+print(f"Checking if system resources were correctly installed on your system...")
+
+"""
+For non-config utilities
+"""
 
 
-def get_icon_path():
+def sys_env_checker(func):
+    """
+    :param func: Function to wrap
+    and validate system environment
+    :return: func() if system
+    environment is valid.
 
-    file_name = "screendimmer.png"
-    image_path = f"/usr/share/pixmaps/{file_name}"
+    Specifically, we want to check
+    for OS compatibility and cmd
+    line argument validity. Any
+    invalid setups will call
+    sys.exit() and exit
+    the program.
+    """
 
-    if platform.system() == "Linux" and path.exists(image_path) and not running_from_pycharm():
-        print(f"Image file path: {image_path}")
-        return image_path
+    def inner():
+
+        if platform.system() != "Linux":  # TODO: Remove from decorator if more OS's are supported
+            print("This OS is currently not supported. Please check the repo if you'd like to make changes.")
+            sys.exit()
+
+        arg_msg = "\nThere was an issue running the program."
+
+        if len(sys.argv) > 1 and sys.argv[1] != "build":
+            print(arg_msg)
+            print(f"\nIf you are building with setup.py, double check that your argument is 'build' and not a typo."
+                  f"\nOtherwise, remove your argument, as arguments are not supported.")
+            sys.exit()
+
+        try:
+            return func()
+        except NameError as ne:
+            print(arg_msg)
+            print(F"An exception was caught. Please report upstream or re-install the application:\n{ne}")
+            sys.exit()
+
+    return inner
+
+
+def open_donation_link():
+
+    url = "https://www.paypal.com/donate?hosted_button_id=YUU33PC5DC592"
+    if platform.system() == "Linux":
+        os.system(f"xdg-open \"{url}\"")
+    elif platform.system() == "Windows":
+        os.system(f"start \"{url}\"")
     else:
-        print(f"Icon file path: (root)")
-        return "../"+file_name
+        return
 
 
+@sys_env_checker
+def get_ini_path():
+
+    """
+    :return: The path to the configuration file,
+    mainly for keeping track of brightness levels.
+
+    Three types of config paths:
+        1) current root directory (for development)
+        2) /etc/$pkgname (Linux, for production)
+        3) The .desktop file in /usr/share/applications/$pkgname.desktop (after packaging)
+    """
+
+    file_name = 'brightness.ini'
+    ini_path_production = f'/etc/screendimmer/{file_name}'
+
+    if path.exists(ini_path_production):
+        print(f"✓ - Brightness file path:\t{file_name} @ {ini_path_production}")
+        return ini_path_production
+    else:
+        print(f"x - Unable to find {file_name} file from path {ini_path_production}. Using local file.")
+
+    if path.exists(file_name):
+        return file_name
+
+    return f"../{file_name}"  # Implies that users are cd'd into root directory of tray.py
+
+
+@sys_env_checker
 def get_desktop_path():
 
     """
@@ -31,61 +105,68 @@ def get_desktop_path():
     $pkgdir/usr/share/applications/$pkgname.desktop
     """
 
-    raw_file_name = 'screendimmer.desktop'
-    linux_path = f'/usr/share/applications/{raw_file_name}'
+    file_name = 'screendimmer.desktop'
+    desktop_path_production = f'/usr/share/applications/{file_name}'
 
-    if platform.system() == "Linux" and path.exists(linux_path) and not running_from_pycharm():
-        print(f"Desktop file path: {linux_path}")
-        return linux_path
+    if path.exists(desktop_path_production):
+        print(f"✓ - Desktop file:\t{file_name} @ {desktop_path_production}")
+        return desktop_path_production
     else:
-        print(f"Desktop file path: {raw_file_name} (root)")
-        return "../"+raw_file_name
+        if len(sys.argv) > 1 and sys.argv[1] == "build":
+            print(f"Installing desktop file to {desktop_path_production}")
+        else:
+            print(f"x - Unable to find {file_name} file from path {desktop_path_production}. Using local file.")
+
+    if path.exists(file_name):
+        return file_name
+
+    return f"../{file_name}"  # Implies that users are cd'd into root directory of tray.py
 
 
-def get_config_path():
+@sys_env_checker
+def get_icon_path():
+
+    file_name = "screendimmer.png"
+    icon_path_production = f"/usr/share/pixmaps/{file_name}"
+
+    if path.exists(icon_path_production):
+        print(f"✓ - Icon file:\t\t{file_name} @ {icon_path_production}")
+        return icon_path_production
+    else:
+        print(f"x - Unable to find {file_name} file from path {icon_path_production}. Using local file.")
+
+    if path.exists(f"resources/{file_name}"):
+        return f"resources/{file_name}"
+
+    return f"../resources/{file_name}"  # Implies that users are cd'd into root directory of tray.py
+
+
+@sys_env_checker
+def get_desktop_file_metadata():
 
     """
-    :return: The path to the configuration file,
-    mainly for keeping track of brightness levels.
+    :return: The 'read' config file
 
-    Three types of config paths:
-        1) current root directory
-        2) /etc/$pkgname (Linux)
-        3) The .desktop file in /usr/share/applications/$pkgname.desktop
+    A wrapper to get and read the actual
+    content of the screendimmer.desktop file.
     """
 
-    raw_file_name = 'brightness.ini'
-    linux_path = f'/etc/screendimmer/{raw_file_name}'
+    desktop_config = configparser.ConfigParser()
+    desktop_config.read(get_desktop_path(), encoding='utf-8')
 
-    if platform.system() == "Linux" and path.exists(linux_path) and not running_from_pycharm():
-        print(f"Brightness file path: {linux_path}")
-        return linux_path
-    else:
-        print(f"Brightness file path: {raw_file_name} (root)")
-        return "../"+raw_file_name
+    return desktop_config
 
 
+@sys_env_checker
 def get_readme_path():
 
     """
     :return: The README.md path
-    (not necessarily OS specific)
+
+    Should only be used by README.md
     """
 
-    if running_from_pycharm():
-        return '../README.md'
-    else:
+    if path.exists("README.md"):
         return 'README.md'
 
-
-def running_from_pycharm():
-
-    """
-    :return: True if we are running the Tray application
-    from Pycharm IDE, False otherwise.
-    Remove usage of this function to see the resulting
-    pathing errors. Or, install this program and try both
-    combinations of pathing and examine the errors.
-    """
-
-    return getenv("PYCHARM_HOSTED") is not None
+    return "../README.md"  # Implies that users are cd'd into root directory of tray.py

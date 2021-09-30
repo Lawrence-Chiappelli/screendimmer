@@ -1,8 +1,8 @@
+import utils
 import configparser
-from screendimmer import utils
 
-file = utils.get_config_path()
 config = configparser.ConfigParser()
+ini_config = utils.get_ini_path()
 
 
 def get_parsed_config():
@@ -11,10 +11,14 @@ def get_parsed_config():
     :return: the parsed version of the config file.
     Note: it is encoded as utf-8 so that emojis
     can be retrieved (it wouldn't work otherwise)
+    Otherwise, return None (not a critical feature)
     """
 
-    config.read(file, encoding='utf-8')
-    return config
+    if ini_config:
+        config.read(ini_config, encoding='utf-8')
+        return config
+
+    return None
 
 
 def overwrite_config_section(section: str, section_items: list):
@@ -36,9 +40,21 @@ def overwrite_config_section(section: str, section_items: list):
         config[section][key] = item
 
 
+def write_brightness(brightness_level: str):
+
+    """
+    :param brightness_level: Brightness level to write
+    to config file. Does not necessarily save the
+    changes to storage. Call save_changes() if
+    you'd like to save the written changes.
+    """
+
+    config['brightness']['level'] = brightness_level
+
+
 def save_changes():
 
-    with open(file, 'w') as new_changes:
+    with open(ini_config, 'w') as new_changes:
         config.write(new_changes)
 
 
