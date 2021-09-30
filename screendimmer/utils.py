@@ -3,7 +3,7 @@ import sys
 import platform
 import configparser
 from os import path
-print(f"Checking if system resources were correctly installed on your system...")
+print(f"Checking system resources... (Current working directory: {os.getcwd()})")
 
 """
 For non-config utilities
