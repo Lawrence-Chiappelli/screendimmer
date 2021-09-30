@@ -31,18 +31,10 @@ def sys_env_checker(func):
             print("This OS is currently not supported. Please check the repo if you'd like to make changes.")
             sys.exit()
 
-        arg_msg = "\nThere was an issue running the program."
-
-        if len(sys.argv) > 1 and sys.argv[1] != "build":
-            print(arg_msg)
-            print(f"\nIf you are building with setup.py, double check that your argument is 'build' and not a typo."
-                  f"\nOtherwise, remove your argument, as arguments are not supported.")
-            sys.exit()
-
         try:
             return func()
         except NameError as ne:
-            print(arg_msg)
+            print("\nThere was an issue running the program.")
             print(F"An exception was caught. Please report upstream or re-install the application:\n{ne}")
             sys.exit()
 
