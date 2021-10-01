@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Version=0.4.1
+Version=0.4.2
 Name=Screen Dimmer
 Comment=A tray app that dims your monitors
 Exec=/usr/bin/screendimmer

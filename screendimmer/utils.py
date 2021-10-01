@@ -3,7 +3,7 @@ import sys
 import platform
 import configparser
 from os import path
-print(f"Checking if system resources were correctly installed on your system...")
+print(f"Checking system resources... (Current working directory: {os.getcwd()})")
 
 """
 For non-config utilities
@@ -31,18 +31,10 @@ def sys_env_checker(func):
             print("This OS is currently not supported. Please check the repo if you'd like to make changes.")
             sys.exit()
 
-        arg_msg = "\nThere was an issue running the program."
-
-        if len(sys.argv) > 1 and sys.argv[1] != "build":
-            print(arg_msg)
-            print(f"\nIf you are building with setup.py, double check that your argument is 'build' and not a typo."
-                  f"\nOtherwise, remove your argument, as arguments are not supported.")
-            sys.exit()
-
         try:
             return func()
         except NameError as ne:
-            print(arg_msg)
+            print("\nThere was an issue running the program.")
             print(F"An exception was caught. Please report upstream or re-install the application:\n{ne}")
             sys.exit()
 
@@ -113,7 +105,7 @@ def get_desktop_path():
         return desktop_path_production
     else:
         if len(sys.argv) > 1 and sys.argv[1] == "build":
-            print(f"Installing desktop file to {desktop_path_production}")
+            print(f"Installing desktop qfile to {desktop_path_production}")
         else:
             print(f"x - Unable to find {file_name} file from path {desktop_path_production}. Using local file.")
 
@@ -126,7 +118,7 @@ def get_desktop_path():
 @sys_env_checker
 def get_icon_path():
 
-    file_name = "resources/screendimmer.png"
+    file_name = "screendimmer.png"
     icon_path_production = f"/usr/share/pixmaps/{file_name}"
 
     if path.exists(icon_path_production):
@@ -134,9 +126,6 @@ def get_icon_path():
         return icon_path_production
     else:
         print(f"x - Unable to find {file_name} file from path {icon_path_production}. Using local file.")
-
-    if path.exists(f"resources/{file_name}"):
-        return f"resources/{file_name}"
 
     return f"../resources/{file_name}"  # Implies that users are cd'd into root directory of tray.py
 

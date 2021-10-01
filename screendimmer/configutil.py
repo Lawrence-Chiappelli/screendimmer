@@ -1,5 +1,9 @@
-import utils
 import configparser
+
+try:
+    import utils
+except ImportError:
+    from screendimmer import utils
 
 config = configparser.ConfigParser()
 ini_config = utils.get_ini_path()
