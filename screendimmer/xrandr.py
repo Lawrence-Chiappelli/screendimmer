@@ -1,95 +1,70 @@
-import platform
 import subprocess
+import sys
 
-from screeninfo import get_monitors
+def invoke_shell_command(base_commands, redirection_commands=[], return_output=False):
 
-monitor_names = [monitor.name for monitor in get_monitors()]
-
-
-def apply_brightness(brightness_level):
-
+    """Invoke a command to the linux shell. Optionally return the result.
+    @param base_commands (list): a list of commands seperated by word
+    @param redirection_commands (list): a list of commands for redirection: 'grep', 'awk' etc
+    @return output (string): The (parsed) output
     """
-    :param brightness_level: The brightness
-    level to apply through config and on
-    the operating system level.
-    Is string to accommodate bash-level
-    commands.
-    :return: True if want to save
-    False otherwise
-    """
+    result = subprocess.Popen(
+        base_commands,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
 
-    print(f"Brightness level: {brightness_level}", end='')
+    if redirection_commands:
+        result = subprocess.check_output(
+            redirection_commands,
+            stdin=result.stdout
+        )
 
-    # Run changes on system
-    if platform.system() == "Linux":
-        # In this case, use bash:
-        for monitor in monitor_names:
-            bashCommand = f"xrandr --output {monitor} --brightness {brightness_level}"
-            subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-            print(f" -> Applied to {monitor}", end='')
-        print("")
+    if return_output:
+        # Differing output structures if fed "piped" commands
+        if redirection_commands:
+            # <class 'bytes'>
+            output = str(result).split('\\n')
+        else:
+            # <class 'subprocess.Popen'>
+            output = str(result.communicate())[1:-1].split('\\n')
 
-
-def convert_label_to_xrandr(label_text: str):
-
-    """
-    :param label_text: Assuming the passed
-    variable is a string from a label,
-    such as 30%
-    :return: The converted float value that
-    matches the format of xrandr
-    """
-
-    return float(str(label_text).replace("%", "")) / 100
-
-
-def convert_xrandr_to_index(xrandr_val: float):
-
-    """
-    :param xrandr_val: usually comes from the
-    config value directly, as a string (it's
-    just the nature of directly retrieving
-    information from a .ini file)
-    :return: an index representation
-    of the current brightness level, useful
-    for switch functions (where we switch
-    based on indexes and not string values)
-    Example: 0.2 is converted to 1
-    """
-
-    return int(xrandr_val * 10 - 1)
-
-
-def increment():
-
-    """
-    Increment the brightness by exactly 0.1 point.
-    Currently unused, but useful for testing or
-    future expansion.
-    :return: None
-    """
-
-    val = float(config['brightness']['level'])
-    if val >= 1.0:
-        print(f"At max brightness!")
+        return output
     else:
-        new_value = "{:.1f}".format(val + 0.1)
-        apply_brightness(new_value)
+        return None
 
+def get_all_monitors():
+    xrandr_command = ['xrandr', '--listactivemonitors']
+    command_output = invoke_shell_command(xrandr_command, return_output=True)
+    relevant_lines = command_output[1:-1]
+    monitors = [line.split(" ").pop(-1) for line in relevant_lines]
+    return monitors
 
-def decrement():
+def get_all_resolutions():
+    return ['1920x1080']
 
-    """
-    Decrement the brightness by exactly 0.1 point.
-    Currently unused, but useful for testing or
-    future expansion.
-    :return: None
-    """
+def get_all_brightnesses():
+    xrandr_command = ['xrandr', '--verbose']
+    pipe_commands = ['grep', 'Brightness']
+    command_output = invoke_shell_command(
+        xrandr_command,
+        redirection_commands=pipe_commands,
+        return_output=True,
+    )
+    del command_output[-1]
+    brightnesses = [line.split(" ").pop(-1) for line in command_output]
 
-    val = float(config['brightness']['level'])
-    if val <= 0.1:
-        print(F"At min brightness!")
-    else:
-        new_value = "{:.1f}".format(val - 0.1)
-        apply_brightness(new_value)
+    return brightnesses
 
+def set_brightness(monitor_name: str, brightness_value: str):
+    xrandr_command = [
+        'xrandr',
+        '--output',
+        monitor_name,
+        '--brightness',
+        brightness_value
+    ]
+    invoke_shell_command(xrandr_command)
+
+if __name__ == '__main__':
+    print("This should not be the main module.")
