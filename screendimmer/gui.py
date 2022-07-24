@@ -7,27 +7,45 @@ extra/tcl    8.6.12-3       6.76 MiB
 extra/tk     8.6.12-1       4.79 MiB
 """
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.geometry('+%d+%d'%(-50,0))
-    # Label(root, text = 'It\'s resizable').pack(side = TOP, pady = 10)
+"""
+pack() - The Pack geometry manager packs widgets in rows or columns.
+grid() - The Grid geometry manager puts the widgets in a 2-dimensional table.
+The master widget is split into a number of rows and columns, and each “cell” in the resulting table can hold a widget.
+place() - The Place geometry manager is the simplest of the three general geometry managers provided in Tkinter.
+It allows you explicitly set the position and size of a window, either in absolute terms, or relative to another window.
+"""
 
-    # On window managers, start the window floating as opposed to tiled
-    # iconwindow
-    # iconmask
-    # maxsize
-    # minsize
-    # positionfrom
-    # 'wm_aspect', 'wm_attributes', 'wm_client', 'wm_colormapwindows'
-    # 'wm_command', 'wm_deiconify', 'wm_focusmodel', 'wm_forget',
-    # 'wm_frame', 'wm_geometry', 'wm_grid', 'wm_group', 'wm_iconbitmap'
-    # 'wm_iconify', 'wm_iconmask', 'wm_iconname', 'wm_iconphoto',
-    # 'wm_iconposition', 'wm_iconwindow', 'wm_manage', 'wm_maxsize',
-    # 'wm_minsize', 'wm_overrideredirect', 'wm_positionfrom',
-    # 'wm_protocol', 'wm_resizable', 'wm_sizefrom', 'wm_state', 'wm_title',
-    # 'wm_transient', 'wm_withdraw'
-    root.attributes('-type', 'dialog')
-    root.title("Screen Dimmer")
-    print(help(root))
+if __name__ == "__main__":
     print("This should not be the main module")
-    root.mainloop()
+
+
+class Gui():
+
+    def __init__(self):
+        self.root = tk.Tk()
+        # self.root.geometry('+%d+%d'%(0,0))
+        self.root.geometry('300x600')
+        self.root.attributes('-type', 'dialog')
+        self.root.title("Screen Dimmer")
+
+    def start(self):
+        self.root.mainloop()
+
+    def populate_with_monitors(self, monitors: list):
+        """Populate the GUI with monitor names.
+
+        @param monitors (list): A list of strings of monitors
+        @return (None): None
+        """
+        for monitor in monitors:
+            label = tk.Label(self.root, text=monitor).pack()
+
+    def populate_brightness_toggles(self, monitors: list, resolutions=None):
+
+        toggle_button = tk.IntVar()
+        for i, monitor in enumerate(monitors):
+            toggle_button = tk.Checkbutton(self.root, text = f" - {monitor} @ {resolutions[i]}",
+                variable = toggle_button,
+                onvalue = 1,
+                offvalue = 0,
+                height = 2).pack()

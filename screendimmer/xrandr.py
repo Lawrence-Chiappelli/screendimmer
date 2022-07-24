@@ -33,17 +33,17 @@ def invoke_shell_command(base_commands, redirection_commands=[], return_output=F
     else:
         return None
 
-def get_all_monitors():
+def parse_all_monitors():
     xrandr_command = ['xrandr', '--listactivemonitors']
     command_output = invoke_shell_command(xrandr_command, return_output=True)
     relevant_lines = command_output[1:-1]
     monitors = [line.split(" ").pop(-1) for line in relevant_lines]
     return monitors
 
-def get_all_resolutions():
+def parse_all_resolutions():
     return ['1920x1080']
 
-def get_all_brightnesses():
+def parse_all_brightnesses():
     xrandr_command = ['xrandr', '--verbose']
     pipe_commands = ['grep', 'Brightness']
     command_output = invoke_shell_command(
