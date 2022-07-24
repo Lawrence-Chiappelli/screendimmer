@@ -11,7 +11,8 @@ if __name__ == '__main__':
     print(brightnesses)
     print(resolutions)
 
-    # tray = gui.Gui()
-    # tray.populate_with_monitors(monitors)
-    # tray.populate_brightness_toggles(monitors, ["2560x1440"])
-    # tray.start()
+    tray = gui.Gui()
+    resolutions.append('2560x1440')
+    tray.populate_brightness_toggles(monitors, resolutions)
+    tray.populate_brightness_inputs(brightnesses)
+    tray.start()

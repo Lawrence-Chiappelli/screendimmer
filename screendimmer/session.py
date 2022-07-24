@@ -24,7 +24,8 @@ class Session():
 
         Standardizing data structures should be done where
         GUI processing needs to happen. Such events are
-        variable in nature.
+        variable in nature and don't necessarily need
+        to be stored permanently.
         """
 
         return {i:(m,b,r) for i, (m,b,r) in enumerate(zip(

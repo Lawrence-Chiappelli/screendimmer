@@ -1,4 +1,5 @@
 import tkinter as tk
+import utils
 
 """
 Package (2)  New Version  Net Change
@@ -40,12 +41,36 @@ class Gui():
         for monitor in monitors:
             label = tk.Label(self.root, text=monitor).pack()
 
-    def populate_brightness_toggles(self, monitors: list, resolutions=None):
+    def populate_brightness_toggles(self, monitors: list, resolutions: list):
+        """Populate the GUI with checkbox toggles. Information should be parsed.
+
+        @param monitors (list): A list of monitors, parsed as raw strings from xrandr
+        @param resolutions (list): A list of resolutions, parsed as raw strings from xrandr
+        @return (None): None
+
+        Note: monitors and resolutions are index adjacent / ordered.
+        """
 
         toggle_button = tk.IntVar()
         for i, monitor in enumerate(monitors):
-            toggle_button = tk.Checkbutton(self.root, text = f" - {monitor} @ {resolutions[i]}",
+            tk.Checkbutton(self.root, text = f" {monitor} ({resolutions[i]})",
                 variable = toggle_button,
                 onvalue = 1,
                 offvalue = 0,
                 height = 2).pack()
+
+    def populate_brightness_inputs(self, brightnesses: list):
+        """Populate the GUI with input boxes accepting new brightness level integers.
+
+        @param brightnesses (list): A list of raw brightnesses from xrandr.
+        Parse after passing argument! The value should initially be a raw string.
+        @return (None): None
+
+        Brightnesses should look something like '0.9'.
+        """
+
+
+        for brightness in brightnesses:
+            converted = utils.convert_xrandr_brightness_to_int(brightness)
+            tk.Spinbox(self.root, from_=0, to=100,
+                textvariable=tk.IntVar(value=converted)).pack()
