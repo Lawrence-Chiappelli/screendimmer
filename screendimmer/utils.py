@@ -14,9 +14,7 @@ def convert_xrandr_brightness_to_int(brightness_val: str):
     if not type(brightness_val) is str:
         raise TypeError("Only strings allowed. Note that the retrieved values from Linux OS are strings.")
 
-    if float(brightness_val) < 1:
-        converted = "{:.2f}".format(float(brightness_val))
-    else:
-        converted = float(brightness_val)
+    if float(brightness_val) < 1.0:
+        brightness_val = "{:.2f}".format(float(brightness_val))
 
-    return Decimal(converted).shift(b)
+    return Decimal(brightness_val).shift(2)
