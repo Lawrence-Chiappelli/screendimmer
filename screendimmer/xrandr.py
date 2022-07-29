@@ -41,6 +41,7 @@ def parse_all_monitors():
     return monitors
 
 def parse_all_resolutions():
+    # TODO: parse the resolutions
     return ['1920x1080']
 
 def parse_all_brightnesses():

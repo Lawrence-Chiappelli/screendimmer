@@ -7,12 +7,16 @@ if __name__ == '__main__':
     monitors = sesh.get_monitors()
     brightnesses = sesh.get_brightnesses()
     resolutions = sesh.get_resolutions()
-    print(monitors)
-    print(brightnesses)
-    print(resolutions)
 
     tray = gui.Gui()
-    resolutions.append('2560x1440')
+
     tray.populate_brightness_toggles(monitors, resolutions)
     tray.populate_brightness_inputs(brightnesses)
+    tray.populate_brightness_scollers(brightnesses)
+
+    print(tray.labels)
+    print(tray.toggles)
+    print(tray.inputs)
+    print(tray.scrollers)
+
     tray.start()
