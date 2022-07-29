@@ -14,7 +14,6 @@ if __name__ == '__main__':
     tray.populate_brightness_inputs(brightnesses)
     tray.populate_brightness_scollers(brightnesses)
 
-    print(tray.labels)
     print(tray.toggles)
     print(tray.inputs)
     print(tray.scrollers)

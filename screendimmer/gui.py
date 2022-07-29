@@ -30,7 +30,6 @@ class Gui():
         self.root.title("Screen Dimmer")
 
         # Note: tkinter elements are editable after being packed.
-        self.labels = []
         self.toggles = []
         self.inputs = []
         self.scrollers = []
@@ -94,10 +93,25 @@ class Gui():
         Brightnesses should look something like '1.0'.
         """
 
-
         for brightness in brightnesses:
             scroller = tk.Scale(self.root, variable=tk.DoubleVar(), from_=100, to=1, orient=tk.VERTICAL)
             converted = utils.convert_xrandr_brightness_to_int(brightness)
             scroller.set(converted)
             scroller.pack()
             self.scrollers.append(scroller)
+
+    def populate_about_window(self):
+        # TODO: flesh out later
+        about_window = tk.Toplevel(self.root)
+        about_window.title("About")
+        about_window.geometry("200x200")
+        tk.Label(about_window, text="This is a Toplevel1 window").pack()
+        about_window.mainloop()
+
+    def open_config(self):
+        # TODO: https://www.geeksforgeeks.org/python-askopenfile-function-in-tkinter/
+        pass
+
+    def save_config(self):
+        # TODO
+        pass
