@@ -25,7 +25,7 @@ class Gui():
     def __init__(self):
         self.root = tk.Tk()
         # self.root.geometry('+%d+%d'%(0,0))
-        self.root.geometry('300x600')
+        # self.root.geometry('300x600')
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
 
@@ -57,14 +57,15 @@ class Gui():
         Note: monitors and resolutions are index adjacent / ordered.
         """
 
-        toggle_button = tk.IntVar()
+        int_repr = tk.IntVar()
         for i, monitor in enumerate(monitors):
+            # TODO: these toggles are triggering at the same time when clicked
             toggle = tk.Checkbutton(self.root, text = f" {monitor} ({resolutions[i]})",
-                variable = toggle_button,
+                variable = int_repr,
                 onvalue = 1,
                 offvalue = 0,
                 height = 2)
-            toggle.pack()
+            toggle.grid(row = 0, column = i, sticky = tk.W, padx = 2)
             self.toggles.append(toggle)
 
     def populate_brightness_inputs(self, brightnesses: list):
@@ -77,10 +78,10 @@ class Gui():
         Brightnesses should look something like '0.9'.
         """
 
-        for brightness in brightnesses:
+        for i, brightness in enumerate(brightnesses):
             converted = utils.convert_xrandr_brightness_to_int(brightness)
             input_box = tk.Spinbox(self.root, from_=0, to=100, textvariable=tk.IntVar(value=converted))
-            input_box.pack()
+            input_box.grid(row = 1, column = i, sticky = tk.W, padx = 2)
             self.inputs.append(input_box)
 
     def populate_brightness_scollers(self, brightnesses: list):
@@ -93,11 +94,11 @@ class Gui():
         Brightnesses should look something like '1.0'.
         """
 
-        for brightness in brightnesses:
+        for i, brightness in enumerate(brightnesses):
             scroller = tk.Scale(self.root, variable=tk.DoubleVar(), from_=100, to=1, orient=tk.VERTICAL)
             converted = utils.convert_xrandr_brightness_to_int(brightness)
             scroller.set(converted)
-            scroller.pack()
+            scroller.grid(row = 2, column = i, sticky = tk.W, padx = 2)
             self.scrollers.append(scroller)
 
     def populate_about_window(self):
@@ -107,6 +108,11 @@ class Gui():
         about_window.geometry("200x200")
         tk.Label(about_window, text="This is a Toplevel1 window").pack()
         about_window.mainloop()
+
+    def populate_close_confirmation(self):
+        # TODO: https://www.geeksforgeeks.org/python-tkinter-askquestion-dialog/
+        # A closing confirmation dialog wouldn't be such a bad idea.
+        pass
 
     def open_config(self):
         # TODO: https://www.geeksforgeeks.org/python-askopenfile-function-in-tkinter/
