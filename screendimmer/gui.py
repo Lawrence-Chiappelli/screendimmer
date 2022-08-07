@@ -106,7 +106,6 @@ class Gui():
         Brightnesses should look something like '1.0'.
         """
 
-        print(brightnesses)
         for i, brightness in enumerate(brightnesses):
             scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
                 from_=100,
