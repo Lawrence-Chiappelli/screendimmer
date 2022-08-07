@@ -21,7 +21,7 @@ if __name__ == '__main__':
     tray = gui.Gui(brightnesses)
 
     tray.populate_brightness_toggles(monitors, resolutions)
-    tray.populate_brightness_inputs(brightnesses)  # TODO: populate with monitors
+    tray.populate_brightness_inputs(brightnesses, monitors)
     tray.populate_brightness_sliders(brightnesses, monitors)
 
     tray.start()

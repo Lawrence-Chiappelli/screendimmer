@@ -36,4 +36,4 @@ def convert_converted_brightness_to_xrandr(brightness_val: str):
     if not int(brightness_val) > -1 and int(brightness_val) < 101:
         raise ValueError("Brightness should be between 1 and 100 - inclusive.")
 
-    return str(Decimal(float(brightness_val) / 100))
+    return str(Decimal(float(brightness_val) / 100))[0:4]
