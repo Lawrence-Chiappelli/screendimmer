@@ -18,3 +18,8 @@ def convert_xrandr_brightness_to_int(brightness_val: str):
         brightness_val = "{:.2f}".format(float(brightness_val))
 
     return Decimal(brightness_val).shift(2)
+
+def convert_converted_brightness_to_xrandr(brightness_val: str):
+    # TODO: keeping this here in the event I need it.
+    # Would like to keep the function name.
+    pass

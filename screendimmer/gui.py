@@ -1,5 +1,6 @@
 import tkinter as tk
 import utils
+import xrandr
 
 from functools import partial
 
@@ -73,7 +74,7 @@ class Gui():
                 onvalue = 1,
                 offvalue = 0,
                 height = 2)
-            toggle.grid(row = 0, column = i, sticky = tk.W, padx = 2)
+            toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
             self.toggles.append(toggle)
 
     def populate_brightness_inputs(self, brightnesses: list):
@@ -88,8 +89,6 @@ class Gui():
 
         for i, brightness in enumerate(brightnesses):
             converted = utils.convert_xrandr_brightness_to_int(brightness)
-            self.brightness_vars.append(tk.IntVar(value=converted))
-
             input_box = tk.Spinbox(self.root, textvariable=self.brightness_vars[i],
                 from_=0,
                 to=100
@@ -107,8 +106,8 @@ class Gui():
         Brightnesses should look something like '1.0'.
         """
 
+        print(brightnesses)
         for i, brightness in enumerate(brightnesses):
-            converted = utils.convert_xrandr_brightness_to_int(brightness)
             scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
                 from_=100,
                 to=1,
