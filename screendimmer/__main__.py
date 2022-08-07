@@ -16,16 +16,12 @@ if __name__ == '__main__':
     # Temporary test data 2:
     monitors.append('TEST-2')
     resolutions.append('1600x1050')
-    brightnesses.append('1.0')
+    brightnesses.append('0.1')
 
-    tray = gui.Gui()
+    tray = gui.Gui(brightnesses)
 
     tray.populate_brightness_toggles(monitors, resolutions)
     tray.populate_brightness_inputs(brightnesses)
-    tray.populate_brightness_scollers(brightnesses)
-
-    print(tray.toggles)
-    print(tray.inputs)
-    print(tray.scrollers)
+    tray.populate_brightness_sliders(brightnesses)
 
     tray.start()

@@ -5,8 +5,8 @@ def invoke_shell_command(base_commands, redirection_commands=[], return_output=F
 
     """Invoke a command to the linux shell. Optionally return the result.
     @param base_commands (list): a list of commands seperated by word
-    @param redirection_commands (list): a list of commands for redirection: 'grep', 'awk' etc
-    @return output (string): The (parsed) output
+    @param redirection_commands (list): an optional list of commands for redirection: 'grep', 'awk' etc
+    @return output (string): Optionally return parsed output if needed
     """
     result = subprocess.Popen(
         base_commands,

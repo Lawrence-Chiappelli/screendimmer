@@ -1,6 +1,8 @@
 import tkinter as tk
 import utils
 
+from functools import partial
+
 """
 Package (2)  New Version  Net Change
 
@@ -19,15 +21,23 @@ It allows you explicitly set the position and size of a window, either in absolu
 if __name__ == "__main__":
     print("This should not be the main module")
 
-
 class Gui():
 
-    def __init__(self):
+    def __init__(self, brightnesses: list):
         self.root = tk.Tk()
-        # self.root.geometry('+%d+%d'%(0,0))
-        # self.root.geometry('300x600')
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
+
+        """
+        Note: the TK vars provide uniqueness for GUI elements, such that
+        they won't share the same states and cause "mirror'ed" behavior.
+
+        On the flipside, with clever engineering, these TK vars can be
+        re-used to provide simulatenous dynamic updating between elements
+        (that is, without specifying a command for each element).
+        """
+        self.toggle_vars = [tk.IntVar() for _ in range(len(brightnesses))]
+        self.brightness_vars = [tk.IntVar(value=utils.convert_xrandr_brightness_to_int(val)) for val in brightnesses]
 
         # Note: tkinter elements are editable after being packed.
         self.toggles = []
@@ -57,11 +67,9 @@ class Gui():
         Note: monitors and resolutions are index adjacent / ordered.
         """
 
-        int_repr = tk.IntVar()
         for i, monitor in enumerate(monitors):
-            # TODO: these toggles are triggering at the same time when clicked
             toggle = tk.Checkbutton(self.root, text = f" {monitor} ({resolutions[i]})",
-                variable = int_repr,
+                variable = self.toggle_vars[i],
                 onvalue = 1,
                 offvalue = 0,
                 height = 2)
@@ -80,11 +88,16 @@ class Gui():
 
         for i, brightness in enumerate(brightnesses):
             converted = utils.convert_xrandr_brightness_to_int(brightness)
-            input_box = tk.Spinbox(self.root, from_=0, to=100, textvariable=tk.IntVar(value=converted))
-            input_box.grid(row = 1, column = i, sticky = tk.W, padx = 2)
+            self.brightness_vars.append(tk.IntVar(value=converted))
+
+            input_box = tk.Spinbox(self.root, textvariable=self.brightness_vars[i],
+                from_=0,
+                to=100
+            )
+            input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
             self.inputs.append(input_box)
 
-    def populate_brightness_scollers(self, brightnesses: list):
+    def populate_brightness_sliders(self, brightnesses: list):
         """Populate the GUI with vertical scrollbars.
 
         @param brightnesses (list): A list of raw brightnesses from xrandr.
@@ -95,10 +108,14 @@ class Gui():
         """
 
         for i, brightness in enumerate(brightnesses):
-            scroller = tk.Scale(self.root, variable=tk.DoubleVar(), from_=100, to=1, orient=tk.VERTICAL)
             converted = utils.convert_xrandr_brightness_to_int(brightness)
-            scroller.set(converted)
-            scroller.grid(row = 2, column = i, sticky = tk.W, padx = 2)
+            scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
+                from_=100,
+                to=1,
+                orient=tk.VERTICAL,
+                length=200
+            )
+            scroller.grid(row=2, column=i, sticky=tk.W, pady=2)
             self.scrollers.append(scroller)
 
     def populate_about_window(self):
