@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import utils
 
 def invoke_shell_command(base_commands, redirection_commands=[], return_output=False):
 
@@ -58,6 +59,20 @@ def parse_all_brightnesses():
     return brightnesses
 
 def set_brightness(monitor_name: str, brightness_value: str):
+    """Set brightness of monitor using xrandr.
+
+    @param monitor_name (str): String representation of xrandr monitor name
+    @param brightness_value (str): Valid range is "0.1"-"1.0" or "1"-"100"
+    @return (None): None
+    """
+
+    if brightness_value.isnumeric():
+        # Corner case: if the passed brightness_value string is a base 10 int,
+        # we need to convert it to an xrandr-usable string.
+        # We have no way of intercepting the Tk value beforehand so I'm forced
+        # to convert it here.
+        brightness_value = utils.convert_converted_brightness_to_xrandr(brightness_value)
+
     xrandr_command = [
         'xrandr',
         '--output',
@@ -65,6 +80,7 @@ def set_brightness(monitor_name: str, brightness_value: str):
         '--brightness',
         brightness_value
     ]
+
     invoke_shell_command(xrandr_command)
 
 if __name__ == '__main__':

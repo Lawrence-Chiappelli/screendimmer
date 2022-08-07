@@ -96,14 +96,14 @@ class Gui():
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
             self.inputs.append(input_box)
 
-    def populate_brightness_sliders(self, brightnesses: list):
+    def populate_brightness_sliders(self, brightnesses: list, monitors: list):
         """Populate the GUI with vertical scrollbars.
 
-        @param brightnesses (list): A list of raw brightnesses from xrandr.
-        Parse after passing argument! The value should initially be a raw string.
+        @param brightnesses (list): Raw string representation of xrandr brightness
+        @param monitors (list): A list of raw monnitor strings from xrandr
         @return (None): None
 
-        Brightnesses should look something like '1.0'.
+        Valid brightness range is "0.1"-"1.0"
         """
 
         for i, brightness in enumerate(brightnesses):
@@ -111,7 +111,11 @@ class Gui():
                 from_=100,
                 to=1,
                 orient=tk.VERTICAL,
-                length=200
+                length=200,
+                command=partial(
+                    xrandr.set_brightness,
+                    monitors[i]
+                )
             )
             scroller.grid(row=2, column=i, sticky=tk.W, pady=2)
             self.scrollers.append(scroller)
