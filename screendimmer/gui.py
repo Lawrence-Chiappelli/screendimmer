@@ -84,8 +84,8 @@ class Gui():
     def _populate_brightness_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
 
-        for i, monitor in enumerate(self.monitors):
-            toggle = tk.Checkbutton(self.root, text = f" {monitor} ({self.resolutions[i]})",
+        for i in range(len(self.monitors)):
+            toggle = tk.Checkbutton(self.root, text=f" {self.monitors[i]} ({self.resolutions[i]})",
                 variable = self.toggle_vars[i],
                 onvalue = 1,
                 offvalue = 0,
@@ -95,20 +95,18 @@ class Gui():
             self.toggles.append(toggle)
 
     def _populate_brightness_inputs(self):
-        """Populate the GUI with input boxes accepting new brightness level integers.
-        Brightnesses should look something like '0.9'.
-        """
+        """Populate the GUI with input boxes accepting new brightness level integers."""
 
-        for i, brightness in enumerate(self.brightnesses):
-            input_box = tk.Entry(self.root, textvariable=self.brightness_vars[i])
+        for i, brightness_var in enumerate(self.brightness_vars):
+            input_box = tk.Entry(self.root, textvariable=brightness_var)
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
             self.inputs.append(input_box)
 
     def _populate_brightness_sliders(self):
         """Populate the GUI with vertical scrollbars."""
 
-        for i, brightness in enumerate(self.brightnesses):
-            scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
+        for i, brightness_var in enumerate(self.brightness_vars):
+            scroller = tk.Scale(self.root, variable=brightness_var,
                 from_=100,
                 to=1,
                 orient=tk.VERTICAL,
