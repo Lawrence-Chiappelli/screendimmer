@@ -66,17 +66,23 @@ def set_brightness(monitor_name: str, brightness_value: str):
     @return (None): None
     """
 
+    print(f"Setting brightness with {(brightness_value)}")
+
     if not type(brightness_value) is str:
-        raise TypeError("Brightness values need to be strings. (Note: values retrieved from TK spinners/scales are strings)")
+        raise TypeError(f"Brightness values need to be strings.\
+        (Note: values retrieved from TK spinners/scales are strings, you had this:\
+        {monitor_name} {type(brightness_value)}: {brightness_value})")
 
     if not type(brightness_value) is str:
         raise TypeError("Monitor names need to be strings.")
 
     if brightness_value.isnumeric():
-        # Corner case: if the passed brightness_value string is a base 10 int,
-        # we need to convert it to an xrandr-usable string input (not base 10).
-        # We have no way of intercepting the Tk value beforehand so I'm forced
-        # to convert it here.
+        """Corner case: if the passed brightness_value string is a base 10 int
+        we need to convert it to an xrandr-usable string input (not base 10).
+
+        We have no way of intercepting the Tk value beforehand so I'm forced
+        to convert it here.
+        """
         brightness_value = utils.convert_converted_brightness_to_xrandr(brightness_value)
 
     xrandr_command = [

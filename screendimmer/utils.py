@@ -3,6 +3,8 @@ from decimal import *
 def convert_xrandr_brightness_to_int(brightness_val: str):
     """Convert the raw xrandr brightness value to a human readable integer.
 
+    Valid brightnesses range from "0.1" to "1.0"
+
     @param brightness_val (str): Xrandr representation of brightness.
     Note that xrandr brightness uses values between 0.0 and 1.0. These are
     strings, not ints/floats!

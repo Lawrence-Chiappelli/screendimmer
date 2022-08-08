@@ -22,31 +22,46 @@ It allows you explicitly set the position and size of a window, either in absolu
 if __name__ == "__main__":
     print("This should not be the main module")
 
-def test(arg1, arg2):
-    print(arg1)
-    print(arg2.get())
-    print(dir(arg2))
-
+def test(arg1=None, arg2=None):
+    print(f"Hello")
+    print(arg1, arg2)
 
 class Gui():
 
-    def __init__(self, brightnesses: list):
+    def __init__(self, monitors: list, resolutions: list, brightnesses: list):
+        """Initialize the GUI with predefined, easily accessible information.
+
+        @param monitors (list): A list of strings of monitors, xrandr representation
+        @param resolutions (list): A list of strings of resolutions, xrandr representation
+        @param brightnesses (list): A list of string floats, xrandr representation
+
+        Note: keep in mind that monitors and resolutions are index adjacent / ordered.
+        """
+
         self.root = tk.Tk()
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
+
+        self.monitors = [monitor for monitor in monitors]
+        self.resolutions = [resolution for resolution in resolutions]
+        self.brightnesses = [brightness for brightness in brightnesses]
 
         """
         Note: the TK vars provide uniqueness for GUI elements, such that
         they won't share the same states and cause "mirror'ed" behavior.
 
-        On the flipside, with clever engineering, these TK vars can be
+        Additionally, with clever engineering, these TK vars can be
         re-used to provide simulatenous dynamic updating between elements
         (that is, without specifying a command for each element).
         """
-        self.toggle_vars = [tk.IntVar() for _ in range(len(brightnesses))]
-        self.brightness_vars = [tk.IntVar(value=utils.convert_xrandr_brightness_to_int(val)) for val in brightnesses]
+        self.toggle_vars = [tk.IntVar() for _ in range(len(self.monitors))]
+        self.brightness_vars = [tk.IntVar(
+            value=utils.convert_xrandr_brightness_to_int(brightness)
+        ) for brightness in self.brightnesses]
 
-        # Note: tkinter elements are editable after being packed.
+        """
+        Note: tkinter elements are editable after being packed.
+        """
         self.toggles = []
         self.inputs = []
         self.scrollers = []
@@ -54,67 +69,49 @@ class Gui():
     def start(self):
         self.root.mainloop()
 
-    def populate_with_monitors(self, monitors: list):
-        """Populate the GUI with monitor names.
+    def generate_gui(self):
+        self._populate_monitor_labels()
+        self._populate_brightness_toggles()
+        self._populate_brightness_inputs()
+        self._populate_brightness_sliders()
 
-        @param monitors (list): A list of strings of monitors
-        @return (None): None
-        """
+    def _populate_monitor_labels(self):
+        """Populate the GUI with monitor names."""
 
-        for monitor in monitors:
-            tk.Label(self.root, text=monitor).pack()
+        for i, monitor in enumerate(self.monitors):
+            tk.Label(self.root, text=monitor).grid(row=0, column=i)
 
-    def populate_brightness_toggles(self, monitors: list, resolutions: list):
-        """Populate the GUI with checkbox toggles. Information should be parsed.
+    def _populate_brightness_toggles(self):
+        """Populate the GUI with checkbox toggles. Information should be parsed."""
 
-        @param monitors (list): A list of monitors, parsed as raw strings from xrandr
-        @param resolutions (list): A list of resolutions, parsed as raw strings from xrandr
-        @return (None): None
-
-        Note: monitors and resolutions are index adjacent / ordered.
-        """
-
-        for i, monitor in enumerate(monitors):
-            toggle = tk.Checkbutton(self.root, text = f" {monitor} ({resolutions[i]})",
+        for i, monitor in enumerate(self.monitors):
+            toggle = tk.Checkbutton(self.root, text = f" {monitor} ({self.resolutions[i]})",
                 variable = self.toggle_vars[i],
                 onvalue = 1,
                 offvalue = 0,
-                height = 2)
+                height = 2
+            )
             toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
             self.toggles.append(toggle)
 
-    def populate_brightness_inputs(self, brightnesses: list, monitors: list):
+    def _populate_brightness_inputs(self):
         """Populate the GUI with input boxes accepting new brightness level integers.
-
-        @param brightnesses (list): A list of raw brightnesses from xrandr
-        @param monitors (list): A list of raw monnitor strings from xrandr
-        Parse after passing argument! The value should initially be a raw string.
-        @return (None): None
-
         Brightnesses should look something like '0.9'.
         """
 
-        # TODO: there's no easy way to get the value of the brightness input
-        for i, brightness in enumerate(brightnesses):
-            input_box = tk.Spinbox(self.root, textvariable=self.brightness_vars[i],
-                from_=0,
-                to=100,
-                command=self.test
-            )
+        for i, brightness in enumerate(self.brightnesses):
+            input_box = tk.Entry(self.root, textvariable=self.brightness_vars[i])
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
+            # input_box.bind('<Return>', self._handle_brightness)
             self.inputs.append(input_box)
+            # print(dir(self.inputs[i]))
 
-    def populate_brightness_sliders(self, brightnesses: list, monitors: list):
+    def _populate_brightness_sliders(self):
         """Populate the GUI with vertical scrollbars.
 
-        @param brightnesses (list): Raw string representation of xrandr brightness
-        @param monitors (list): A list of raw monnitor strings from xrandr
-        @return (None): None
-
-        Valid brightness range is "0.1"-"1.0"
         """
 
-        for i, brightness in enumerate(brightnesses):
+        for i, brightness in enumerate(self.brightnesses):
             scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
                 from_=100,
                 to=1,
@@ -122,7 +119,7 @@ class Gui():
                 length=200,
                 command=partial(
                     xrandr.set_brightness,
-                    monitors[i]
+                    self.monitors[i]
                 )
             )
             scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
@@ -149,5 +146,14 @@ class Gui():
         # TODO
         pass
 
-    def test(self):
-        print(type(self.brightness_vars[0].get()))
+    def _set_brightness(self, index: int):
+        xrandr.set_brightness(
+
+        )
+
+    def _handle_brightness(self, tk_event: type(tk.Event)):
+        print(dir(tk_event.widget))
+        data = tk_event.widget.get()
+        monitor_index = tk_event.widget.grid_info()['column']
+        monitor_name = self.toggles[monitor_index]
+        print(dir(monitor_name))

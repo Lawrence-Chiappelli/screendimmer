@@ -18,10 +18,11 @@ if __name__ == '__main__':
     resolutions.append('1600x1050')
     brightnesses.append('0.1')
 
-    tray = gui.Gui(brightnesses)
+    tray = gui.Gui(
+        monitors,
+        resolutions,
+        brightnesses
+    )
 
-    tray.populate_brightness_toggles(monitors, resolutions)
-    tray.populate_brightness_inputs(brightnesses, monitors)
-    tray.populate_brightness_sliders(brightnesses, monitors)
-
+    tray.generate_gui()
     tray.start()
