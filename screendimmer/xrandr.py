@@ -66,12 +66,10 @@ def set_brightness(monitor_name: str, brightness_value: str):
     @return (None): None
     """
 
-    print(f"Setting brightness with {(brightness_value)}")
-
     if not type(brightness_value) is str:
         raise TypeError(f"Brightness values need to be strings.\
         (Note: values retrieved from TK spinners/scales are strings, you had this:\
-        {monitor_name} {type(brightness_value)}: {brightness_value})")
+        {monitor_name} @ {brightness_value}: {type(brightness_value)})")
 
     if not type(brightness_value) is str:
         raise TypeError("Monitor names need to be strings.")

@@ -102,14 +102,10 @@ class Gui():
         for i, brightness in enumerate(self.brightnesses):
             input_box = tk.Entry(self.root, textvariable=self.brightness_vars[i])
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
-            # input_box.bind('<Return>', self._handle_brightness)
             self.inputs.append(input_box)
-            # print(dir(self.inputs[i]))
 
     def _populate_brightness_sliders(self):
-        """Populate the GUI with vertical scrollbars.
-
-        """
+        """Populate the GUI with vertical scrollbars."""
 
         for i, brightness in enumerate(self.brightnesses):
             scroller = tk.Scale(self.root, variable=self.brightness_vars[i],
@@ -145,15 +141,3 @@ class Gui():
     def save_config(self):
         # TODO
         pass
-
-    def _set_brightness(self, index: int):
-        xrandr.set_brightness(
-
-        )
-
-    def _handle_brightness(self, tk_event: type(tk.Event)):
-        print(dir(tk_event.widget))
-        data = tk_event.widget.get()
-        monitor_index = tk_event.widget.grid_info()['column']
-        monitor_name = self.toggles[monitor_index]
-        print(dir(monitor_name))

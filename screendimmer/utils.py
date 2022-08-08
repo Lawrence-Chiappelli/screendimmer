@@ -20,7 +20,7 @@ def convert_xrandr_brightness_to_int(brightness_val: str):
     if float(brightness_val) < 1.0:
         brightness_val = "{:.2f}".format(float(brightness_val))
 
-    return Decimal(brightness_val).shift(2)
+    return int(Decimal(brightness_val).shift(2))
 
 def convert_converted_brightness_to_xrandr(brightness_val: str):
     """Convert the "tkinter" brightness to an xrandr-usable value.
