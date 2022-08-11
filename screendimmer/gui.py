@@ -22,10 +22,6 @@ It allows you explicitly set the position and size of a window, either in absolu
 if __name__ == "__main__":
     print("This should not be the main module")
 
-def test(arg1=None, arg2=None):
-    print(f"Hello")
-    print(arg1, arg2)
-
 class Gui():
 
     def __init__(self, monitors: list, resolutions: list, brightnesses: list):
@@ -55,7 +51,7 @@ class Gui():
         (that is, without specifying a command for each element).
         """
         self.toggle_vars = [tk.IntVar() for _ in range(len(self.monitors))]
-        self.brightness_vars = [tk.IntVar(
+        self.brightness_vars = [tk.StringVar(
             value=utils.convert_xrandr_brightness_to_int(brightness)
         ) for brightness in self.brightnesses]
 
@@ -70,6 +66,7 @@ class Gui():
         self.root.mainloop()
 
     def generate_gui(self):
+        # TODO: populate user input listeners
         self._populate_monitor_labels()
         self._populate_brightness_toggles()
         self._populate_brightness_inputs()
@@ -94,12 +91,38 @@ class Gui():
             toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
             self.toggles.append(toggle)
 
+    def my_callback(self, var, index, mode):
+        """[summary] TODO
+
+        @param var (str): String representation of pyvar, not the full object
+        @param index (type): [description] TBD
+        @param mode (str): 'r'/'w' / 'read'/'write', etc
+        @return (None): None
+        """
+
+        # print(f"Var: {type(var)} {var}")
+        # print(f"Index: {type(index)} {index}")
+        # print(f"Mode: {type(mode)} {mode}")
+
+        if not index:
+            vars_as_str_repr = [str(brightness_var) for brightness_var in self.brightness_vars]
+            index = vars_as_str_repr.index(var)
+
+        xrandr.set_brightness(self.monitors[index], self.brightness_vars[index].get())
+
     def _populate_brightness_inputs(self):
         """Populate the GUI with input boxes accepting new brightness level integers."""
 
         for i, brightness_var in enumerate(self.brightness_vars):
-            input_box = tk.Entry(self.root, textvariable=brightness_var)
+            # TODO: move elsewhere
+            brightness_var.trace_add('write', self.my_callback)
+            input_box = tk.Spinbox(self.root, textvariable=brightness_var,
+                from_=0,
+                to=100,
+                exportselection=0
+            )
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
+
             self.inputs.append(input_box)
 
     def _populate_brightness_sliders(self):
@@ -111,10 +134,10 @@ class Gui():
                 to=1,
                 orient=tk.VERTICAL,
                 length=200,
-                command=partial(
-                    xrandr.set_brightness,
-                    self.monitors[i]
-                )
+                # command=partial(
+                #     xrandr.set_brightness,
+                #     self.monitors[i]
+                # )
             )
             scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
             self.scrollers.append(scroller)
