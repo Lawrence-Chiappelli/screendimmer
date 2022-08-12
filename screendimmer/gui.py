@@ -66,11 +66,16 @@ class Gui():
         self.root.mainloop()
 
     def generate_gui(self):
-        # TODO: populate user input listeners
         self._populate_monitor_labels()
         self._populate_brightness_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_sliders()
+        self._populate_brightness_callbacks()
+
+    def _populate_brightness_callbacks(self):
+        """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
+
+        [var.trace_add('write', self._brightness_handler_callback) for var in self.brightness_vars]
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""
@@ -91,38 +96,47 @@ class Gui():
             toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
             self.toggles.append(toggle)
 
-    def my_callback(self, var, index, mode):
-        """[summary] TODO
+    def _filter(self, var, index, mode):
+        self._brightness_handler_callback(var, index, mode)
+
+    def _brightness_handler_callback(self, var, index, mode):
+        """Handle more than 1 task when a brightness value is detected
 
         @param var (str): String representation of pyvar, not the full object
         @param index (type): [description] TBD
         @param mode (str): 'r'/'w' / 'read'/'write', etc
-        @return (None): None
+        @return (bool): False to abort, True to indicate done
         """
 
-        # print(f"Var: {type(var)} {var}")
-        # print(f"Index: {type(index)} {index}")
-        # print(f"Mode: {type(mode)} {mode}")
-
         if not index:
+            # Manually retrieve the index in the event it's returned as None
             vars_as_str_repr = [str(brightness_var) for brightness_var in self.brightness_vars]
             index = vars_as_str_repr.index(var)
 
-        xrandr.set_brightness(self.monitors[index], self.brightness_vars[index].get())
+        brightness_value = self.brightness_vars[index].get()
+        if brightness_value.isnumeric():
+            # Filter
+            if int(brightness_value) > 100:
+                brightness_value = 100
+            elif int(brightness_value) < 0:
+                brightness_value = 5
+        else:
+            # Or abort
+            return False
+
+        xrandr.set_brightness(self.monitors[index], brightness_value)
+        return True
 
     def _populate_brightness_inputs(self):
         """Populate the GUI with input boxes accepting new brightness level integers."""
 
+
         for i, brightness_var in enumerate(self.brightness_vars):
-            # TODO: move elsewhere
-            brightness_var.trace_add('write', self.my_callback)
             input_box = tk.Spinbox(self.root, textvariable=brightness_var,
                 from_=0,
-                to=100,
-                exportselection=0
+                to=100
             )
             input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
-
             self.inputs.append(input_box)
 
     def _populate_brightness_sliders(self):
@@ -133,11 +147,7 @@ class Gui():
                 from_=100,
                 to=1,
                 orient=tk.VERTICAL,
-                length=200,
-                # command=partial(
-                #     xrandr.set_brightness,
-                #     self.monitors[i]
-                # )
+                length=200
             )
             scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
             self.scrollers.append(scroller)
