@@ -65,7 +65,7 @@ class Gui():
         """Construct the GUI with data, elements, callbacks and colors"""
 
         self._configure_metadata()
-        self._populate_monitor_labels()
+        # self._populate_monitor_labels()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_scrollers()
@@ -104,13 +104,6 @@ class Gui():
                 activebackground=scrollbar_bg
             )
 
-    def _populate_monitor_labels(self):
-        """Populate the GUI with monitor names."""
-
-        for i, monitor in enumerate(self.monitors):
-            tk.Label(self.root, text=monitor).grid(row=0, column=i)
-
-
     def _populate_monitor_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
 
@@ -124,7 +117,7 @@ class Gui():
                     i
                 )
             )
-            toggle.grid(row=0, column=i, sticky=tk.E+tk.W, padx=10)
+            toggle.grid(row=0, column=i, sticky=tk.E+tk.W, padx=10, pady=(10,0))
             self.toggles.append(toggle)
 
     def _populate_brightness_inputs(self):
@@ -135,7 +128,7 @@ class Gui():
                 from_=0,
                 to=100
             )
-            input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10)
+            input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10, pady=(0, 20))
             self.inputs.append(input_box)
 
     def _populate_brightness_scrollers(self):
