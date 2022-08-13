@@ -195,7 +195,6 @@ class Gui():
             index = pyvar_as_str_repr.index(var)
 
         brightness_value = self.brightness_vars[index].get()
-        print(brightness_value)
 
         if brightness_value.isnumeric():
             # Filter
