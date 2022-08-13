@@ -97,7 +97,10 @@ class Gui():
         for index in range(len(self.monitors)):
             # TODO: dark mode colors for checkboxes
             print(self.inputs[index]['buttoncursor'])
-            self.toggles[index].configure(background=bg, foreground=fg, highlightbackground=bg)
+            self.toggles[index].configure(background=bg, foreground=fg,
+                highlightbackground=bg,
+                activebackground=scrollbar_bg,
+                selectcolor=entry_bg)
             self.inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg
