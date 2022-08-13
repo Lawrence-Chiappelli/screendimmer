@@ -14,9 +14,9 @@ if __name__ == '__main__':
     brightnesses.append('0.8')
 
     # Temporary test data 2:
-    monitors.append('TEST-2')
-    resolutions.append('1600x1050')
-    brightnesses.append('0.1')
+    monitors.append(monitors[0])
+    resolutions.append(resolutions[0])
+    brightnesses.append(brightnesses[0])
 
     tray = gui.Gui(
         monitors,

@@ -80,18 +80,29 @@ class Gui():
         bg = config.Colors().get_background_color()
         fg = config.Colors().get_foreground_color()
         entry_bg = config.Colors().get_entry_background_color()
+        trough_bg = config.Colors().get_trough_background_color()
+        scrollbar_bg = config.Colors().get_scrollbar_background_color()
 
         self.root.configure(background=bg)
 
         if self.global_scroller:
-            self.global_scroller.configure(background=bg, foreground=fg, highlightbackground=bg)
+            self.global_scroller.configure(background=bg, foreground=fg,
+                highlightbackground=bg,
+                troughcolor=trough_bg,
+                activebackground=scrollbar_bg
+            )
 
+        widest_element_length = 0
         for index in range(len(self.monitors)):
-            # TODO: dark mode colors for all borders/outlines,
+            # TODO: dark mode colors for:
             # scale scrollbar active/inactive+bg, spinbox buttons
             self.toggles[index].configure(background=bg, foreground=fg, highlightbackground=bg)
             self.inputs[index].configure(background=entry_bg, foreground=fg, highlightbackground=bg)
-            self.scrollers[index].configure(background=bg, foreground=fg, highlightbackground=bg)
+            self.scrollers[index].configure(background=bg, foreground=fg,
+                highlightbackground=bg,
+                troughcolor=trough_bg,
+                activebackground=scrollbar_bg
+            )
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""
@@ -113,7 +124,7 @@ class Gui():
                     i
                 )
             )
-            toggle.grid(row=0, column=i, sticky='ew')
+            toggle.grid(row=0, column=i, sticky=tk.E+tk.W, padx=10)
             self.toggles.append(toggle)
 
     def _populate_brightness_inputs(self):
@@ -124,7 +135,7 @@ class Gui():
                 from_=0,
                 to=100
             )
-            input_box.grid(row=1, column=i, sticky='ew')
+            input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10)
             self.inputs.append(input_box)
 
     def _populate_brightness_scrollers(self):
@@ -196,7 +207,7 @@ class Gui():
             self.scrollers[i].config(troughcolor="#ff0000")
         else:
             self.scrollers[i].config(state=tk.NORMAL)
-            self.scrollers[i].config(troughcolor=config.Colors().get_trough_active_background_color())
+            self.scrollers[i].config(troughcolor=config.Colors().get_trough_background_color())
 
     def populate_about_window(self):
         # TODO: flesh out later
