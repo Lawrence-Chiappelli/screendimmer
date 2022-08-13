@@ -35,15 +35,36 @@ def invoke_shell_command(base_commands, redirection_commands=[], return_output=F
         return None
 
 def parse_all_monitors():
-    xrandr_command = ['xrandr', '--listactivemonitors']
-    command_output = invoke_shell_command(xrandr_command, return_output=True)
-    relevant_lines = command_output[1:-1]
-    monitors = [line.split(" ").pop(-1) for line in relevant_lines]
+    """Return a list of parsed monitors as strings.
+
+    @return (list): A list of monitors as strings.
+    """
+
+    xrandr_command = ['xrandr', '-q']
+    command_output = invoke_shell_command(
+        xrandr_command,
+        redirection_commands=['grep', '-w', 'connected'],
+        return_output=True
+    )
+    relevant_lines = command_output[0].replace("b'", "")
+    monitors = [relevant_lines.split(" ")[0]]
     return monitors
 
 def parse_all_resolutions():
-    # TODO: parse the resolutions
-    return ['1920x1080']
+    """Return a list of parsed resolutions as strings.
+
+    @return (list): A list of resolutions as strings.
+    """
+
+    xrandr_command = ['xrandr', '-q']
+    command_output = invoke_shell_command(
+        xrandr_command,
+        redirection_commands=['grep', '-w', 'connected'],
+        return_output=True
+    )
+    relevant_lines = command_output[0].replace("b'", "").split('+')[0]
+    resolutions = [relevant_lines.split(" ")[2]]
+    return resolutions
 
 def parse_all_brightnesses():
     xrandr_command = ['xrandr', '--verbose']
