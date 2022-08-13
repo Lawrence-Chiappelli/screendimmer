@@ -43,7 +43,7 @@ class Colors:
             self.bg='#d9d9d9'
             self.fg='#000000'
             self.entry_bg="#ffffff"
-            self.trough_active_bg="#@b3b3b3"
+            self.trough_active_bg="#b3b3b3"
 
 
 if __name__ == '__main__':

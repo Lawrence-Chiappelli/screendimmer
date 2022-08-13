@@ -57,6 +57,7 @@ class Gui():
         self.toggles = []
         self.inputs = []
         self.scrollers = []
+        self.global_scroller = None
 
     def start(self):
         self.root.mainloop()
@@ -82,6 +83,11 @@ class Gui():
         entry_bg = config.Colors().get_entry_background_color()
 
         self.root.configure(background=bg)
+
+        if self.global_scroller:
+            self.global_scroller.configure(background=bg)
+            self.global_scroller.configure(foreground=fg)
+
         for index in range(len(self.monitors)):
             # TODO: dark mode colors for all borders/outlines,
             # scale scrollbar active/inactive+bg, spinbox buttons
@@ -139,6 +145,19 @@ class Gui():
             )
             scroller.grid(row=2, column=i, sticky=tk.S)
             self.scrollers.append(scroller)
+
+        if len(self.monitors) > 1:
+            # Apply the global scroller if we have more than 1 monitor
+            global_scroller = tk.Scale(self.root, variable=tk.IntVar(),
+                from_=1,
+                to=100,
+                orient=tk.HORIZONTAL,
+                length=200,
+                takefocus=1,
+            )
+
+            global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
+            self.global_scroller = global_scroller
 
     def _attach_brightness_callbacks(self):
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
