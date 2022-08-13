@@ -1,5 +1,6 @@
 /venv/
-/__pycache__/
+
 preview.png
 screendimmer.png
-/screendimmer/snippets
+screendimmer/snippets
+/screendimmer/__pycache__*

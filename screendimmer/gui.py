@@ -1,6 +1,7 @@
 import tkinter as tk
 import utils
 import xrandr
+import config
 
 from functools import partial
 
@@ -50,10 +51,8 @@ class Gui():
         re-used to provide simulatenous dynamic updating between elements
         (that is, without specifying a command for each element).
         """
-        self.toggle_vars = [tk.IntVar() for _ in range(len(self.monitors))]
-        self.brightness_vars = [tk.StringVar(
-            value=utils.convert_xrandr_brightness_to_int(brightness)
-        ) for brightness in self.brightnesses]
+        self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
+        self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
 
         """
         Note: tkinter elements are editable after being packed.
@@ -66,16 +65,14 @@ class Gui():
         self.root.mainloop()
 
     def generate_gui(self):
+        """Initalize the GUI with interactive elements and callbacks"""
+
         self._populate_monitor_labels()
-        self._populate_brightness_toggles()
+        self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_sliders()
         self._populate_brightness_callbacks()
-
-    def _populate_brightness_callbacks(self):
-        """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
-
-        [var.trace_add('write', self._brightness_handler_callback) for var in self.brightness_vars]
+        self.root['background'] = config.Colors().get_background_color()
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""
@@ -83,21 +80,52 @@ class Gui():
         for i, monitor in enumerate(self.monitors):
             tk.Label(self.root, text=monitor).grid(row=0, column=i)
 
-    def _populate_brightness_toggles(self):
+    def _populate_monitor_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
 
         for i in range(len(self.monitors)):
             toggle = tk.Checkbutton(self.root, text=f" {self.monitors[i]} ({self.resolutions[i]})",
-                variable = self.toggle_vars[i],
-                onvalue = 1,
-                offvalue = 0,
-                height = 2
+                variable=self.toggle_vars[i],
+                onvalue=1,
+                offvalue=0,
+                height=2,
+                command=partial(
+                    self._checkbox_handler,
+                    i
+                )
             )
             toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
             self.toggles.append(toggle)
 
-    def _filter(self, var, index, mode):
-        self._brightness_handler_callback(var, index, mode)
+    def _populate_brightness_inputs(self):
+        """Populate the GUI with input boxes accepting new brightness level integers."""
+
+        for i, brightness_var in enumerate(self.brightness_vars):
+            input_box = tk.Spinbox(self.root, textvariable=brightness_var,
+                from_=0,
+                to=100
+            )
+            input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
+            self.inputs.append(input_box)
+
+    def _populate_brightness_sliders(self):
+        """Populate the GUI with vertical scrollbars."""
+
+        for i, brightness_var in enumerate(self.brightness_vars):
+            scroller = tk.Scale(self.root, variable=brightness_var,
+                from_=100,
+                to=1,
+                orient=tk.VERTICAL,
+                length=200,
+                takefocus=1,
+            )
+            scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
+            self.scrollers.append(scroller)
+
+    def _populate_brightness_callbacks(self):
+        """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
+
+        [var.trace_add('write', self._brightness_handler_callback) for var in self.brightness_vars]
 
     def _brightness_handler_callback(self, var, index, mode):
         """Handle more than 1 task when a brightness value is detected
@@ -127,30 +155,16 @@ class Gui():
         xrandr.set_brightness(self.monitors[index], brightness_value)
         return True
 
-    def _populate_brightness_inputs(self):
-        """Populate the GUI with input boxes accepting new brightness level integers."""
+    def _checkbox_handler(self, i):
+        checkbox_state = self.toggle_vars[i].get()
 
-
-        for i, brightness_var in enumerate(self.brightness_vars):
-            input_box = tk.Spinbox(self.root, textvariable=brightness_var,
-                from_=0,
-                to=100
-            )
-            input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
-            self.inputs.append(input_box)
-
-    def _populate_brightness_sliders(self):
-        """Populate the GUI with vertical scrollbars."""
-
-        for i, brightness_var in enumerate(self.brightness_vars):
-            scroller = tk.Scale(self.root, variable=brightness_var,
-                from_=100,
-                to=1,
-                orient=tk.VERTICAL,
-                length=200
-            )
-            scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
-            self.scrollers.append(scroller)
+        if checkbox_state == 0:
+            # TODO: create config file that has colors for light mode and dark mode
+            self.scrollers[i].config(state=tk.DISABLED)
+            self.scrollers[i].config(troughcolor="#ff0000")
+        else:
+            self.scrollers[i].config(state=tk.NORMAL)
+            self.scrollers[i].config(troughcolor="#00ff00")
 
     def populate_about_window(self):
         # TODO: flesh out later
