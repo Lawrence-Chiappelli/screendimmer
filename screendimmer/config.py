@@ -12,6 +12,9 @@ class Colors:
         self.disabled_bg=self.DarkMode().disabled_bg if self.dark_mode else self.LightMode().disabled_bg
         self.disabled_fg=self.DarkMode().disabled_fg if self.dark_mode else self.LightMode().disabled_fg
 
+    def get_darkmode_state(self):
+        return self.dark_mode
+
     def get_background_color(self):
         """General background color of an element"""
         return self.bg
@@ -68,8 +71,8 @@ class Colors:
             self.button_bg="#d9d9d9"
             self.trough_bg="#b3b3b3"
             self.scrollbar_bg="#b3b3b3"
-            self.disabled_bg="#444444"
-            self.disabled_fg="#000000"
+            self.disabled_bg="#d9d9d9"
+            self.disabled_fg="#a3a3a3"
 
 if __name__ == '__main__':
     print("This should not be the main module")

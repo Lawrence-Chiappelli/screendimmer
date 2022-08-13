@@ -84,6 +84,7 @@ class Gui():
         scrollbar_bg = config.Colors().get_scrollbar_background_color()
         disabled_bg = config.Colors().get_disabled_background_color()
         disabled_fg = config.Colors().get_disabled_foreground_color()
+        darkmode_enabled = config.Colors().get_darkmode_state()
 
         self.root.configure(background=bg)
 
@@ -94,9 +95,7 @@ class Gui():
                 activebackground=scrollbar_bg
             )
 
-        widest_element_length = 0
         for index in range(len(self.monitors)):
-            # TODO: dark mode colors for checkboxes
             self.toggles[index].configure(background=bg, foreground=fg,
                 highlightbackground=bg,
                 activebackground=scrollbar_bg,
@@ -105,12 +104,16 @@ class Gui():
             self.inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg,
-                disabledforeground=disabled_fg
+                disabledbackground=disabled_bg if darkmode_enabled else None,
+                disabledforeground=disabled_fg if darkmode_enabled else None
             )
-            self.scrollers[index].configure(background=bg, foreground=fg,
+            
+            checkbox_state = self.toggle_vars[index].get()
+            self.scrollers[index].configure(
+                background=bg,
+                foreground=fg if checkbox_state == 1 else disabled_fg,
                 highlightbackground=bg,
-                troughcolor=trough_bg
+                troughcolor=trough_bg if checkbox_state == 1 else disabled_bg
             )
 
     def _populate_monitor_toggles(self):
@@ -203,22 +206,17 @@ class Gui():
         xrandr.set_brightness(self.monitors[index], brightness_value)
         return True
 
-    def _checkbox_handler(self, i):
+    def _checkbox_handler(self, i: int):
         checkbox_state = self.toggle_vars[i].get()
 
         if checkbox_state == 0:
             self.scrollers[i].config(state=tk.DISABLED)
             self.inputs[i].config(state=tk.DISABLED)
-
-            self.scrollers[i].config(troughcolor='#444444')
-            # self.scrollers[i].config(background='#444444')
-            self.scrollers[i].config(foreground='#000000')
         else:
             self.scrollers[i].config(state=tk.NORMAL)
             self.inputs[i].config(state=tk.NORMAL)
-            self.scrollers[i].config(troughcolor=config.Colors().get_trough_background_color())
-            # self.scrollers[i].config(background=config.Colors().get_background_color())
-            self.scrollers[i].config(foreground=config.Colors().get_foreground_color())
+
+        self._configure_theme()
 
     def _construct_about_window(self):
         # TODO: flesh out later
