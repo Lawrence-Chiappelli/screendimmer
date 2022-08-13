@@ -63,9 +63,8 @@ class Gui():
 
     def construct_gui(self):
         """Construct the GUI with data, elements, callbacks and colors"""
-
+        self._construct_about_window()
         self._configure_metadata()
-        # self._populate_monitor_labels()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_scrollers()
@@ -83,6 +82,8 @@ class Gui():
         trough_bg = config.Colors().get_trough_background_color()
         button_bg = config.Colors().get_button_background_color()
         scrollbar_bg = config.Colors().get_scrollbar_background_color()
+        disabled_bg = config.Colors().get_disabled_background_color()
+        disabled_fg = config.Colors().get_disabled_foreground_color()
 
         self.root.configure(background=bg)
 
@@ -96,19 +97,20 @@ class Gui():
         widest_element_length = 0
         for index in range(len(self.monitors)):
             # TODO: dark mode colors for checkboxes
-            print(self.inputs[index]['buttoncursor'])
             self.toggles[index].configure(background=bg, foreground=fg,
                 highlightbackground=bg,
                 activebackground=scrollbar_bg,
-                selectcolor=entry_bg)
+                selectcolor=entry_bg
+            )
             self.inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
-                buttonbackground=button_bg
+                buttonbackground=button_bg,
+                disabledbackground=disabled_bg,
+                disabledforeground=disabled_fg
             )
             self.scrollers[index].configure(background=bg, foreground=fg,
                 highlightbackground=bg,
-                troughcolor=trough_bg,
-                activebackground=scrollbar_bg
+                troughcolor=trough_bg
             )
 
     def _populate_monitor_toggles(self):
@@ -144,10 +146,12 @@ class Gui():
         for i, brightness_var in enumerate(self.brightness_vars):
             scroller = tk.Scale(self.root, variable=brightness_var,
                 from_=100,
-                to=1,
+                to=0,
                 orient=tk.VERTICAL,
                 length=200,
                 takefocus=1,
+                tickinterval=10,
+                showvalue=False
             )
             scroller.grid(row=2, column=i, sticky=tk.S)
             self.scrollers.append(scroller)
@@ -155,11 +159,12 @@ class Gui():
         if len(self.monitors) > 1:
             # Apply the global scroller if we have more than 1 monitor
             global_scroller = tk.Scale(self.root, variable=tk.IntVar(),
-                from_=1,
+                from_=0,
                 to=100,
                 orient=tk.HORIZONTAL,
                 length=200,
                 takefocus=1,
+                tickinterval=10
             )
 
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
@@ -202,20 +207,34 @@ class Gui():
         checkbox_state = self.toggle_vars[i].get()
 
         if checkbox_state == 0:
-            # TODO: create config file that has colors for light mode and dark mode
             self.scrollers[i].config(state=tk.DISABLED)
-            self.scrollers[i].config(troughcolor="#ff0000")
+            self.inputs[i].config(state=tk.DISABLED)
+
+            self.scrollers[i].config(troughcolor='#444444')
+            # self.scrollers[i].config(background='#444444')
+            self.scrollers[i].config(foreground='#000000')
         else:
             self.scrollers[i].config(state=tk.NORMAL)
+            self.inputs[i].config(state=tk.NORMAL)
             self.scrollers[i].config(troughcolor=config.Colors().get_trough_background_color())
+            # self.scrollers[i].config(background=config.Colors().get_background_color())
+            self.scrollers[i].config(foreground=config.Colors().get_foreground_color())
 
-    def populate_about_window(self):
+    def _construct_about_window(self):
         # TODO: flesh out later
+        import datetime
+
         about_window = tk.Toplevel(self.root)
-        about_window.title("About")
-        about_window.geometry("200x200")
-        tk.Label(about_window, text="This is a Toplevel1 window").pack()
-        about_window.mainloop()
+        application_name = 'Screen Dimmer'  # TODO - get via config/constants file
+        application_version = '2.0.0'  # TODO - same with above
+        current_year = datetime.datetime.now().date().strftime("%Y")
+
+        about_window.attributes('-type', 'dialog')
+        about_window.geometry('400x200')
+        about_window.title(f"About - {application_name} Ver {application_version}")
+        label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.")
+        label.grid(row=0, column=0)
+        return about_window
 
     def populate_close_confirmation(self):
         # TODO: https://www.geeksforgeeks.org/python-tkinter-askquestion-dialog/

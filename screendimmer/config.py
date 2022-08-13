@@ -9,6 +9,8 @@ class Colors:
         self.button_bg=self.DarkMode().button_bg if self.dark_mode else self.LightMode().button_bg
         self.trough_bg=self.DarkMode().trough_bg if self.dark_mode else self.LightMode().trough_bg
         self.scrollbar_bg=self.DarkMode().scrollbar_bg if self.dark_mode else self.LightMode().scrollbar_bg
+        self.disabled_bg=self.DarkMode().disabled_bg if self.dark_mode else self.LightMode().disabled_bg
+        self.disabled_fg=self.DarkMode().disabled_fg if self.dark_mode else self.LightMode().disabled_fg
 
     def get_background_color(self):
         """General background color of an element"""
@@ -34,6 +36,14 @@ class Colors:
         """The color of the scrollbar itself"""
         return self.scrollbar_bg
 
+    def get_disabled_background_color(self):
+        """Use for any element that's disabled"""
+        return self.disabled_bg
+
+    def get_disabled_foreground_color(self):
+        """Use for any element that's disabled"""
+        return self.disabled_fg
+
     class DarkMode:
         def __init__(self):
             #423a4f
@@ -47,6 +57,8 @@ class Colors:
             self.button_bg="#d9d9d9"
             self.trough_bg="#84828c"
             self.scrollbar_bg="#735a9b"
+            self.disabled_bg="#444444"
+            self.disabled_fg="#000000"
 
     class LightMode:
         def __init__(self):
@@ -56,6 +68,8 @@ class Colors:
             self.button_bg="#d9d9d9"
             self.trough_bg="#b3b3b3"
             self.scrollbar_bg="#b3b3b3"
+            self.disabled_bg="#444444"
+            self.disabled_fg="#000000"
 
 if __name__ == '__main__':
     print("This should not be the main module")
