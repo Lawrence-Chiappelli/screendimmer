@@ -222,11 +222,17 @@ class Gui():
         # No need to filter the value, there is currently no
         # way for the user to manually enter the information.
 
-        for var in self.brightness_vars:
-            var.set(brightness_value)
-            # No need to call xrandr. The change in the pyvar value will
-            # automatically call the non-global brightness handler function,
-            # which calls the xrandr.set_brightness function for us.
+        for i in range(len(self.brightness_vars)):
+            checkbox_state = self.toggle_vars[i].get()
+            # Because we are directly bypassing the spinbox and setting
+            # the value directly on its pyvar, we are required to
+            # manually check if said spinbox is enabled/disabled.
+
+            if checkbox_state == 1:
+                self.brightness_vars[i].set(brightness_value)
+                # No need to call xrandr. The change in the pyvar value will
+                # automatically call the non-global brightness handler function,
+                # which calls the xrandr.set_brightness function for us.
         return True
 
     def _checkbox_handler(self, i: int):
