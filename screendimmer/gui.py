@@ -36,9 +36,6 @@ class Gui():
         """
 
         self.root = tk.Tk()
-        self.root.attributes('-type', 'dialog')
-        self.root.title("Screen Dimmer")
-
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
         self.brightnesses = [brightness for brightness in brightnesses]
@@ -67,11 +64,16 @@ class Gui():
     def generate_gui(self):
         """Initalize the GUI with interactive elements and callbacks"""
 
+        self._configure_general_gui_data()
         self._populate_monitor_labels()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_sliders()
         self._populate_brightness_callbacks()
+
+    def _configure_general_gui_data(self):
+        self.root.attributes('-type', 'dialog')
+        self.root.title("Screen Dimmer")
         self.root.configure(background=config.Colors().get_background_color())
 
     def _populate_monitor_labels(self):
