@@ -68,8 +68,8 @@ class Gui():
         self._populate_monitor_labels()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
-        self._populate_brightness_sliders()
-        self._populate_brightness_callbacks()
+        self._populate_brightness_scrollers()
+        self._attach_brightness_callbacks()
         self._configure_theme()
 
     def _configure_metadata(self):
@@ -126,7 +126,7 @@ class Gui():
             input_box.grid(row=1, column=i, sticky='ew')
             self.inputs.append(input_box)
 
-    def _populate_brightness_sliders(self):
+    def _populate_brightness_scrollers(self):
         """Populate the GUI with vertical scrollbars."""
 
         for i, brightness_var in enumerate(self.brightness_vars):
@@ -140,7 +140,7 @@ class Gui():
             scroller.grid(row=2, column=i, sticky=tk.S)
             self.scrollers.append(scroller)
 
-    def _populate_brightness_callbacks(self):
+    def _attach_brightness_callbacks(self):
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
 
         [var.trace_add('write', self._brightness_handler_callback) for var in self.brightness_vars]
@@ -182,7 +182,7 @@ class Gui():
             self.scrollers[i].config(troughcolor="#ff0000")
         else:
             self.scrollers[i].config(state=tk.NORMAL)
-            self.scrollers[i].config(troughcolor="#00ff00")
+            self.scrollers[i].config(troughcolor=config.Colors().get_trough_active_background_color())
 
     def populate_about_window(self):
         # TODO: flesh out later
