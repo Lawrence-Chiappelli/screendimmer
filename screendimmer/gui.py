@@ -81,6 +81,7 @@ class Gui():
         fg = config.Colors().get_foreground_color()
         entry_bg = config.Colors().get_entry_background_color()
         trough_bg = config.Colors().get_trough_background_color()
+        button_bg = config.Colors().get_button_background_color()
         scrollbar_bg = config.Colors().get_scrollbar_background_color()
 
         self.root.configure(background=bg)
@@ -94,10 +95,13 @@ class Gui():
 
         widest_element_length = 0
         for index in range(len(self.monitors)):
-            # TODO: dark mode colors for:
-            # scale scrollbar active/inactive+bg, spinbox buttons
+            # TODO: dark mode colors for checkboxes
+            print(self.inputs[index]['buttoncursor'])
             self.toggles[index].configure(background=bg, foreground=fg, highlightbackground=bg)
-            self.inputs[index].configure(background=entry_bg, foreground=fg, highlightbackground=bg)
+            self.inputs[index].configure(background=entry_bg, foreground=fg,
+                highlightbackground=bg,
+                buttonbackground=button_bg
+            )
             self.scrollers[index].configure(background=bg, foreground=fg,
                 highlightbackground=bg,
                 troughcolor=trough_bg,
