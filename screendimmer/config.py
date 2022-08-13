@@ -25,17 +25,9 @@ class Colors:
 
     class DarkMode:
         def __init__(self):
-            # self.bg='#1d1f21'
-            self.bg="#1d1f1f"
+            self.bg="#26242f"
             self.fg='#d8d4cf'
             self.entry_bg="#111111"
-            self.trough_active_bg="#b3b3b3"
-
-    class DevMode:
-        def __init__(self):
-            self.bg='#ff0000'
-            self.fg='#00ff00'
-            self.entry_bg="#0000ff"
             self.trough_active_bg="#b3b3b3"
 
     class LightMode:

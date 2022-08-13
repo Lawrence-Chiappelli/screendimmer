@@ -53,7 +53,6 @@ class Gui():
         self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
 
         """Note: the following tkinter elements are editable after being packed."""
-
         self.toggles = []
         self.inputs = []
         self.scrollers = []
@@ -85,24 +84,21 @@ class Gui():
         self.root.configure(background=bg)
 
         if self.global_scroller:
-            self.global_scroller.configure(background=bg)
-            self.global_scroller.configure(foreground=fg)
+            self.global_scroller.configure(background=bg, foreground=fg, highlightbackground=bg)
 
         for index in range(len(self.monitors)):
             # TODO: dark mode colors for all borders/outlines,
             # scale scrollbar active/inactive+bg, spinbox buttons
-            self.toggles[index].configure(background=bg)
-            self.toggles[index].configure(foreground=fg)
-            self.inputs[index].configure(background=entry_bg)
-            self.inputs[index].configure(foreground=fg)
-            self.scrollers[index].configure(background=bg)
-            self.scrollers[index].configure(foreground=fg)
+            self.toggles[index].configure(background=bg, foreground=fg, highlightbackground=bg)
+            self.inputs[index].configure(background=entry_bg, foreground=fg, highlightbackground=bg)
+            self.scrollers[index].configure(background=bg, foreground=fg, highlightbackground=bg)
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""
 
         for i, monitor in enumerate(self.monitors):
             tk.Label(self.root, text=monitor).grid(row=0, column=i)
+
 
     def _populate_monitor_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
@@ -112,7 +108,6 @@ class Gui():
                 variable=self.toggle_vars[i],
                 onvalue=1,
                 offvalue=0,
-                height=2,
                 command=partial(
                     self._checkbox_handler,
                     i
