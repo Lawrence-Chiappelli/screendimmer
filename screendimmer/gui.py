@@ -51,6 +51,7 @@ class Gui():
 
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
         self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
+        self.global_brightness_var = tk.StringVar()
 
         """Note: the following tkinter elements are editable after being packed."""
         self.toggles = []
@@ -107,7 +108,7 @@ class Gui():
                 disabledbackground=disabled_bg if darkmode_enabled else None,
                 disabledforeground=disabled_fg if darkmode_enabled else None
             )
-            
+
             checkbox_state = self.toggle_vars[index].get()
             self.scrollers[index].configure(
                 background=bg,
@@ -161,7 +162,7 @@ class Gui():
 
         if len(self.monitors) > 1:
             # Apply the global scroller if we have more than 1 monitor
-            global_scroller = tk.Scale(self.root, variable=tk.IntVar(),
+            global_scroller = tk.Scale(self.root, variable=self.global_brightness_var,
                 from_=0,
                 to=100,
                 orient=tk.HORIZONTAL,
@@ -169,7 +170,7 @@ class Gui():
                 takefocus=1,
                 tickinterval=10
             )
-
+            global_scroller.set(100)  # So that users start scrolling with the max brightness level
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
             self.global_scroller = global_scroller
 
@@ -177,22 +178,25 @@ class Gui():
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
 
         [var.trace_add('write', self._brightness_handler_callback) for var in self.brightness_vars]
+        self.global_brightness_var.trace_add('write', self._global_brightness_handler_callback)
 
     def _brightness_handler_callback(self, var, index, mode):
         """Handle more than 1 task when a brightness value is detected
 
         @param var (str): String representation of pyvar, not the full object
-        @param index (type): [description] TBD
+        @param index (None): Gets passed as None from Tkinter, but needed above
         @param mode (str): 'r'/'w' / 'read'/'write', etc
         @return (bool): False to abort, True to indicate done
         """
 
         if not index:
             # Manually retrieve the index in the event it's returned as None
-            vars_as_str_repr = [str(brightness_var) for brightness_var in self.brightness_vars]
-            index = vars_as_str_repr.index(var)
+            pyvar_as_str_repr = [str(brightness_var) for brightness_var in self.brightness_vars]
+            index = pyvar_as_str_repr.index(var)
 
         brightness_value = self.brightness_vars[index].get()
+        print(brightness_value)
+
         if brightness_value.isnumeric():
             # Filter
             if int(brightness_value) > 100:
@@ -204,6 +208,26 @@ class Gui():
             return False
 
         xrandr.set_brightness(self.monitors[index], brightness_value)
+        return True
+
+    def _global_brightness_handler_callback(self, var, index, mode):
+        """Pass and set the global brightness value to every brightness pyvar
+
+        @param var (str): String representation of pyvar, not the full object
+        @param index (None): Gets passed as None from Tkinter, but needed above
+        @param mode (str): 'r'/'w' / 'read'/'write', etc
+        @return (bool): False to abort, True to indicate done
+        """
+
+        brightness_value = self.global_brightness_var.get()
+        # No need to filter the value, there is currently no
+        # way for the user to manually enter the information.
+
+        for var in self.brightness_vars:
+            var.set(brightness_value)
+            # No need to call xrandr. The change in the pyvar value will
+            # automatically call the non-global brightness handler function,
+            # which calls the xrandr.set_brightness function for us.
         return True
 
     def _checkbox_handler(self, i: int):
