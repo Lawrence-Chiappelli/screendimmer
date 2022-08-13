@@ -24,5 +24,5 @@ if __name__ == '__main__':
         brightnesses
     )
 
-    tray.generate_gui()
+    tray.construct_gui()
     tray.start()

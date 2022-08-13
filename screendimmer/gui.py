@@ -48,12 +48,12 @@ class Gui():
         re-used to provide simulatenous dynamic updating between elements
         (that is, without specifying a command for each element).
         """
+
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
         self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
 
-        """
-        Note: tkinter elements are editable after being packed.
-        """
+        """Note: the following tkinter elements are editable after being packed."""
+
         self.toggles = []
         self.inputs = []
         self.scrollers = []
@@ -61,20 +61,36 @@ class Gui():
     def start(self):
         self.root.mainloop()
 
-    def generate_gui(self):
-        """Initalize the GUI with interactive elements and callbacks"""
+    def construct_gui(self):
+        """Construct the GUI with data, elements, callbacks and colors"""
 
-        self._configure_general_gui_data()
+        self._configure_metadata()
         self._populate_monitor_labels()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_sliders()
         self._populate_brightness_callbacks()
+        self._configure_theme()
 
-    def _configure_general_gui_data(self):
+    def _configure_metadata(self):
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
-        self.root.configure(background=config.Colors().get_background_color())
+
+    def _configure_theme(self):
+        bg = config.Colors().get_background_color()
+        fg = config.Colors().get_foreground_color()
+        entry_bg = config.Colors().get_entry_background_color()
+
+        self.root.configure(background=bg)
+        for index in range(len(self.monitors)):
+            # TODO: dark mode colors for all borders/outlines,
+            # scale scrollbar active/inactive+bg, spinbox buttons
+            self.toggles[index].configure(background=bg)
+            self.toggles[index].configure(foreground=fg)
+            self.inputs[index].configure(background=entry_bg)
+            self.inputs[index].configure(foreground=fg)
+            self.scrollers[index].configure(background=bg)
+            self.scrollers[index].configure(foreground=fg)
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""
@@ -96,7 +112,7 @@ class Gui():
                     i
                 )
             )
-            toggle.grid(row=0, column=i, sticky=tk.W, padx=2)
+            toggle.grid(row=0, column=i, sticky='ew')
             self.toggles.append(toggle)
 
     def _populate_brightness_inputs(self):
@@ -107,7 +123,7 @@ class Gui():
                 from_=0,
                 to=100
             )
-            input_box.grid(row=1, column=i, sticky=tk.W, padx=2)
+            input_box.grid(row=1, column=i, sticky='ew')
             self.inputs.append(input_box)
 
     def _populate_brightness_sliders(self):
@@ -121,7 +137,7 @@ class Gui():
                 length=200,
                 takefocus=1,
             )
-            scroller.grid(row=2, column=i, sticky=tk.S, pady=2)
+            scroller.grid(row=2, column=i, sticky=tk.S)
             self.scrollers.append(scroller)
 
     def _populate_brightness_callbacks(self):
