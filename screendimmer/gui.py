@@ -72,7 +72,7 @@ class Gui():
         self._populate_brightness_inputs()
         self._populate_brightness_sliders()
         self._populate_brightness_callbacks()
-        self.root['background'] = config.Colors().get_background_color()
+        self.root.configure(background=config.Colors().get_background_color())
 
     def _populate_monitor_labels(self):
         """Populate the GUI with monitor names."""

@@ -3,7 +3,6 @@ class Colors:
     def __init__(self):
         self.dark_mode=True # TODO: determine with config parser
         self.bg=self.DarkMode().bg if self.dark_mode else self.LightMode().fg
-        self.fg=self.DarkMode().fg if self.dark_mode else self.LightMode().fg
         self.text=self.DarkMode().text if self.dark_mode else self.LightMode().text
 
     def get_background_color(self):
@@ -17,20 +16,17 @@ class Colors:
 
     class DarkMode:
         def __init__(self):
-            self.bg='#000000'
-            self.fg='#00ff00'
-            self.text='#ffffff'
+            self.bg='#131516'
+            self.text='#d8d4cf'
 
     class DevMode:
         def __init__(self):
             self.bg='#0f0000'
-            self.fg='#00f000'
             self.text='#000f00'
 
     class LightMode:
         def __init__(self):
             self.bg='#d9d9d9'
-            self.fg='#f0f000'
             self.text='#000000'
 
 
