@@ -1,9 +1,10 @@
 import tkinter as tk
 import utils
 import xrandr
-import config
+import colors
 
 from functools import partial
+
 
 """
 Package (2)  New Version  Net Change
@@ -22,6 +23,9 @@ It allows you explicitly set the position and size of a window, either in absolu
 
 if __name__ == "__main__":
     print("This should not be the main module")
+else:
+    color = colors.Colors()
+
 
 class Gui():
 
@@ -36,6 +40,8 @@ class Gui():
         """
 
         self.root = tk.Tk()
+        self.menu = self._construct_menu_bar()
+        self.about = self._construct_about_window()
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
         self.brightnesses = [brightness for brightness in brightnesses]
@@ -54,17 +60,16 @@ class Gui():
         self.global_brightness_var = tk.StringVar()
 
         """Note: the following tkinter elements are editable after being packed."""
-        self.toggles = []
-        self.inputs = []
-        self.scrollers = []
-        self.global_scroller = None
+        self._toggles = []
+        self._inputs = []
+        self._scrollers = []
+        self._global_scroller = None
 
     def start(self):
         self.root.mainloop()
 
     def construct_gui(self):
-        """Construct the GUI with data, elements, callbacks and colors"""
-        self._construct_about_window()
+        """Construct the GUI with data, elements, callbacks and color"""
         self._configure_metadata()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
@@ -76,33 +81,58 @@ class Gui():
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
 
+    def _open_about_window(self):
+        print("Opening about window")
+        self.about.deiconify()
+        self.root.withdraw()
+
+    def _close_about_window(self, *args):
+        self.about.withdraw()
+        self.root.deiconify()
+
+    def _construct_menu_bar(self):
+        menu = tk.Menu(self.root)
+
+        file = tk.Menu(menu, tearoff=0)
+        file.add_command(label='Preferences', command=None)
+        file.add_command(label='Quit', command=self.root.destroy)
+        help = tk.Menu(menu, tearoff=0)
+        help.add_command(label='About', command=self._open_about_window)
+
+        menu.add_cascade(label='File', menu=file)
+        menu.add_cascade(label='Help', menu=help)
+        self.root.config(menu=menu)
+        return menu
+
     def _configure_theme(self):
-        bg = config.Colors().get_background_color()
-        fg = config.Colors().get_foreground_color()
-        entry_bg = config.Colors().get_entry_background_color()
-        trough_bg = config.Colors().get_trough_background_color()
-        button_bg = config.Colors().get_button_background_color()
-        scrollbar_bg = config.Colors().get_scrollbar_background_color()
-        disabled_bg = config.Colors().get_disabled_background_color()
-        disabled_fg = config.Colors().get_disabled_foreground_color()
-        darkmode_enabled = config.Colors().get_darkmode_state()
+        bg = color.get_background_color()
+        fg = color.get_foreground_color()
+        entry_bg = color.get_entry_background_color()
+        trough_bg = color.get_trough_background_color()
+        button_bg = color.get_button_background_color()
+        scrollbar_bg = color.get_scrollbar_background_color()
+        disabled_bg = color.get_disabled_background_color()
+        disabled_fg = color.get_disabled_foreground_color()
+        darkmode_enabled = color.get_darkmode_state()
 
         self.root.configure(background=bg)
+        self.menu.configure(background=entry_bg)
+        self.menu.configure(foreground=fg)
 
-        if self.global_scroller:
-            self.global_scroller.configure(background=bg, foreground=fg,
+        if self._global_scroller:
+            self._global_scroller.configure(background=bg, foreground=fg,
                 highlightbackground=bg,
                 troughcolor=trough_bg,
                 activebackground=scrollbar_bg
             )
 
         for index in range(len(self.monitors)):
-            self.toggles[index].configure(background=bg, foreground=fg,
+            self._toggles[index].configure(background=bg, foreground=fg,
                 highlightbackground=bg,
                 activebackground=scrollbar_bg,
                 selectcolor=entry_bg
             )
-            self.inputs[index].configure(background=entry_bg, foreground=fg,
+            self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
                 disabledbackground=disabled_bg if darkmode_enabled else None,
@@ -110,7 +140,7 @@ class Gui():
             )
 
             checkbox_state = self.toggle_vars[index].get()
-            self.scrollers[index].configure(
+            self._scrollers[index].configure(
                 background=bg,
                 foreground=fg if checkbox_state == 1 else disabled_fg,
                 highlightbackground=bg,
@@ -131,7 +161,7 @@ class Gui():
                 )
             )
             toggle.grid(row=0, column=i, sticky=tk.E+tk.W, padx=10, pady=(10,0))
-            self.toggles.append(toggle)
+            self._toggles.append(toggle)
 
     def _populate_brightness_inputs(self):
         """Populate the GUI with input boxes accepting new brightness level integers."""
@@ -142,7 +172,7 @@ class Gui():
                 to=100
             )
             input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10, pady=(0, 20))
-            self.inputs.append(input_box)
+            self._inputs.append(input_box)
 
     def _populate_brightness_scrollers(self):
         """Populate the GUI with vertical scrollbars."""
@@ -158,7 +188,7 @@ class Gui():
                 showvalue=False
             )
             scroller.grid(row=2, column=i, sticky=tk.S)
-            self.scrollers.append(scroller)
+            self._scrollers.append(scroller)
 
         if len(self.monitors) > 1:
             # Apply the global scroller if we have more than 1 monitor
@@ -172,7 +202,7 @@ class Gui():
             )
             global_scroller.set(100)  # So that users start scrolling with the max brightness level
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
-            self.global_scroller = global_scroller
+            self._global_scroller = global_scroller
 
     def _attach_brightness_callbacks(self):
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
@@ -239,11 +269,11 @@ class Gui():
         checkbox_state = self.toggle_vars[i].get()
 
         if checkbox_state == 0:
-            self.scrollers[i].config(state=tk.DISABLED)
-            self.inputs[i].config(state=tk.DISABLED)
+            self._scrollers[i].config(state=tk.DISABLED)
+            self._inputs[i].config(state=tk.DISABLED)
         else:
-            self.scrollers[i].config(state=tk.NORMAL)
-            self.inputs[i].config(state=tk.NORMAL)
+            self._scrollers[i].config(state=tk.NORMAL)
+            self._inputs[i].config(state=tk.NORMAL)
 
         self._configure_theme()
 
@@ -261,6 +291,9 @@ class Gui():
         about_window.title(f"About - {application_name} Ver {application_version}")
         label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.")
         label.grid(row=0, column=0)
+
+        about_window.withdraw()  # By default, the about window will show - unless we tell it not to
+        about_window.bind('<Escape>', self._close_about_window)
         return about_window
 
     def populate_close_confirmation(self):
