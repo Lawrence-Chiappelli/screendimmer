@@ -1,4 +1,5 @@
 import tkinter as tk
+import datetime
 import utils
 import xrandr
 import colors
@@ -279,8 +280,6 @@ class Gui():
 
     def _construct_about_window(self):
         # TODO: flesh out later
-        import datetime
-
         about_window = tk.Toplevel(self.root)
         application_name = 'Screen Dimmer'  # TODO - get via config/constants file
         application_version = '2.0.0'  # TODO - same with above
@@ -295,16 +294,3 @@ class Gui():
         about_window.withdraw()  # By default, the about window will show - unless we tell it not to
         about_window.bind('<Escape>', self._close_about_window)
         return about_window
-
-    def populate_close_confirmation(self):
-        # TODO: https://www.geeksforgeeks.org/python-tkinter-askquestion-dialog/
-        # A closing confirmation dialog wouldn't be such a bad idea.
-        pass
-
-    def open_config(self):
-        # TODO: https://www.geeksforgeeks.org/python-askopenfile-function-in-tkinter/
-        pass
-
-    def save_config(self):
-        # TODO
-        pass

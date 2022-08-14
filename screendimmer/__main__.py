@@ -8,7 +8,7 @@ if __name__ == '__main__':
     resolutions = sesh.get_resolutions()
     brightnesses = sesh.get_brightnesses()
 
-    # Temporary test data 1:
+    # Temporary test dataabout_window 1:
     monitors.append('TEST-1')
     resolutions.append('1920x1080')
     brightnesses.append('0.8')
@@ -26,3 +26,4 @@ if __name__ == '__main__':
 
     tray.construct_gui()
     tray.start()
+    print("done")
