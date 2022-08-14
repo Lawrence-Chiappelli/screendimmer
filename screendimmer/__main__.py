@@ -26,4 +26,3 @@ if __name__ == '__main__':
 
     tray.construct_gui()
     tray.start()
-    print("done")

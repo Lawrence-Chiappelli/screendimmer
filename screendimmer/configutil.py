@@ -1,57 +1,38 @@
 import configparser
-# try:
 import utils
-# except ImportError:
-#     from screendimmer import utils
 
 from os import path
 
 """
 A glorified wrapper for configparses and parsing .ini configuration files.
+
+To get your config contents, edit and call retrieve_configuration_file.
+
+That function will automate the steps that need to be taken
+care of before your config file can be used.
 """
 
-def get_parsed_config():
+config = configparser.ConfigParser()  # <--- initially empty
 
-    """
-    :return: the parsed version of the config file.
-    Note: it is encoded as utf-8 so that emojis
-    can be retrieved (it wouldn't work otherwise)
-    Otherwise, return None (not a critical feature)
+def retrieve_configuration_file():
+    """Retrieve your parsed configuration file
+
+    @return (None): if the config file was not found
+    @raise type: [description]
     """
 
-    if ini_config:
-        config.read(ini_config, encoding='utf-8')
+    path_to_config = get_ini_path(
+        file_name='config.ini',
+        pkgname='screendimmer',
+        in_production=False,
+        continue_if_not_found=True
+    )
+    config.read(path_to_config, encoding='utf-8')
+
+    if config and path_to_config:
         return config
-
-    return None
-
-
-def get_ini_path(file_name='config.ini', in_production=True):
-    """The path to the .ini that keeps track of monitor brightness levels and theme preference
-
-    @param in_production (bool): Allows the developer to forcefully not check for the prod path
-    @return (str): The path to config.ini
-
-    Available pathing options:
-        1) Development: ../brightness.ini
-        2) Production: /etc/$pkgname/brightness.ini (Linux, for production)
-        3) The .desktop file in /usr/share/applications/$pkgname.desktop (after packaging)
-    """
-
-    # TODO: may want to rewrite this to be more general for config files
-    # abstract between production, development, and fallback
-    ini_path_production = f'/etc/screendimmer/{file_name}'
-
-    if in_production and path.exists(ini_path_production):
-        print(f"✓ - Brightness file path:\t{file_name} @ {ini_path_production}")
-        return ini_path_production
     else:
-        print(f"x - Unable to find {file_name} file from path {ini_path_production}. Using local file.")
-
-    if path.exists(file_name):
-        return file_name
-
-    return f"../{file_name}"  # Implies that users are cd'd into root directory of tray.py
+        return None
 
 
 def overwrite_config_section(section: str, section_items: list):
@@ -133,8 +114,45 @@ def get_key_name_as_convention(desired_name: str):
     return desired_name.lower().replace(" ", "").replace(":", "")
 
 
+def get_ini_path(file_name='config.ini', pkgname='screendimmer', in_production=True, continue_if_not_found=True):
+    print(f"Getting INI path")
+    """The path to the .ini that keeps track of monitor brightness levels and theme preference
+
+    @param file_name (str): The raw name of your configuration file, include the extension
+    @param pkgname (str): Part of the path, according to Linux file placement conventions (see code)
+    @param in_production (bool): Set this to False if you want to test locally and have your config
+    file installed in the production path, otherwise this really doesn't matter, keep as True
+    @param continue_if_not_found (bool): Continue the program normally if True
+
+    @return (str, None): Return the string path if config found, or None if not found
+    @raise FileNotFoundError: Abort the program if program not found
+    """
+
+    absolute_path_production = f'/etc/{pkgname}/{file_name}'
+    root_path_development = f"{file_name}"
+    up_one_path_development = f'../{file_name}'
+
+    if in_production and path.exists(absolute_path_production):
+        print(f"✓ - In production envionment, {file_name} found at {absolute_path_production}")
+        return absolute_path_production
+    elif path.exists(root_path_development):
+        print(f"✓ - In development envionment, {file_name} found at ./{root_path_development}")
+        return root_path_development
+    elif path.exists(up_one_path_development):
+        print(f"✓ - In development envionment, {file_name} found at {up_one_path_development}")
+        return up_one_path_development
+    else:
+        feedback_for_user = f"Unable to find the configuration file {file_name}.\
+        I attempted to look for the file in the following places:\n \
+        {absolute_path_production}\n{root_path_development}\n{up_one_path_development}\n \
+        Maybe the file was moved or deleted?"
+
+        if continue_if_not_found:
+            print(feedback_for_user)
+            return None
+        else:
+            raise FileNotFoundError(feedback_for_user)
+
+
 if __name__ == 'main':
     print(f"This should not be the main module")
-else:
-    config = configparser.ConfigParser()
-    ini_config = get_ini_path(file_name='config.ini', in_production=False)

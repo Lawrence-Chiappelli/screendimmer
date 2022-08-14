@@ -1,11 +1,11 @@
 import configutil
 
-config = configutil.get_parsed_config()
+config = configutil.retrieve_configuration_file()
 
 class Colors:
 
     def __init__(self):
-        self.dark_mode=eval(config['theme']['darkmode'])
+        self.dark_mode=self.set_darkmode_state()
 
         self.bg=self.DarkMode().bg if self.dark_mode else self.LightMode().bg
         self.fg=self.DarkMode().fg if self.dark_mode else self.LightMode().fg
@@ -17,7 +17,19 @@ class Colors:
         self.disabled_fg=self.DarkMode().disabled_fg if self.dark_mode else self.LightMode().disabled_fg
         self.hyperlink_fg=self.DarkMode().hyperlink_fg if self.dark_mode else self.LightMode().hyperlink_fg
 
+    def set_darkmode_state(self):
+        """Return the darkmode state as specified in the user configuration file.
+
+        The default is True, and in the event the configuration file was not found,
+        set the default to True anyway.
+        """
+        if config:
+            return eval(config['theme']['darkmode'])
+        else:
+            return True
+
     def get_darkmode_state(self):
+        """Get the True/False state"""
         return self.dark_mode
 
     def get_background_color(self):
