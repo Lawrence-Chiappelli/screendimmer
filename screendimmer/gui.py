@@ -1,11 +1,12 @@
 import tkinter as tk
 import datetime
+import webbrowser
 import utils
 import xrandr
 import colors
 
+from tkinter import messagebox
 from functools import partial
-
 
 """
 Package (2)  New Version  Net Change
@@ -81,15 +82,6 @@ class Gui():
     def _configure_metadata(self):
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
-
-    def _open_about_window(self):
-        print("Opening about window")
-        self.about.deiconify()
-        self.root.withdraw()
-
-    def _close_about_window(self, *args):
-        self.about.withdraw()
-        self.root.deiconify()
 
     def _construct_menu_bar(self):
         menu = tk.Menu(self.root)
@@ -279,18 +271,54 @@ class Gui():
         self._configure_theme()
 
     def _construct_about_window(self):
-        # TODO: flesh out later
+
+        def openurl(url):
+           webbrowser.open_new_tab(url)
+
         about_window = tk.Toplevel(self.root)
         application_name = 'Screen Dimmer'  # TODO - get via config/constants file
         application_version = '2.0.0'  # TODO - same with above
         current_year = datetime.datetime.now().date().strftime("%Y")
 
         about_window.attributes('-type', 'dialog')
-        about_window.geometry('400x200')
+        # about_window.geometry('350x200')
         about_window.title(f"About - {application_name} Ver {application_version}")
-        label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.")
-        label.grid(row=0, column=0)
+        image = tk.Label(about_window, image="::tk::icons::information")
+        image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
+
+        # Copyright:
+        copyright_string = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
+            font=10,
+            justify=tk.LEFT,
+        )
+        copyright_string.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+
+        # GitHub link:
+        github_string = tk.Label(about_window, text="View on GitHub",
+            font=10,
+            fg="blue",
+            cursor="hand2"
+        )
+        github_string.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
+        github_string.bind("<Button-1>", lambda e:
+            openurl("https://github.com/Lawrence-Chiappelli/screendimmer")
+        )
+
+        # Contact:
+        contact_string = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
+            font=10,
+            justify=tk.LEFT,
+        )
+        contact_string.grid(row=2, column=1, sticky=tk.W, pady=(0, 20))
 
         about_window.withdraw()  # By default, the about window will show - unless we tell it not to
         about_window.bind('<Escape>', self._close_about_window)
         return about_window
+
+    def _open_about_window(self):
+        self.about.deiconify()
+        self.root.withdraw()
+
+    def _close_about_window(self, *args):
+        self.about.withdraw()
+        self.root.deiconify()
