@@ -79,23 +79,12 @@ class Gui():
         self._attach_brightness_callbacks()
         self._configure_theme()
 
+    """
+    Various data configurators:
+    """
     def _configure_metadata(self):
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
-
-    def _construct_menu_bar(self):
-        menu = tk.Menu(self.root)
-
-        file = tk.Menu(menu, tearoff=0)
-        file.add_command(label='Preferences', command=None)
-        file.add_command(label='Quit', command=self.root.destroy)
-        help = tk.Menu(menu, tearoff=0)
-        help.add_command(label='About', command=self._open_about_window)
-
-        menu.add_cascade(label='File', menu=file)
-        menu.add_cascade(label='Help', menu=help)
-        self.root.config(menu=menu)
-        return menu
 
     def _configure_theme(self):
         bg = color.get_background_color()
@@ -106,11 +95,12 @@ class Gui():
         scrollbar_bg = color.get_scrollbar_background_color()
         disabled_bg = color.get_disabled_background_color()
         disabled_fg = color.get_disabled_foreground_color()
-        darkmode_enabled = color.get_darkmode_state()
+        hyperlink_fg = color.get_hyperlink_foreground_color()
 
         self.root.configure(background=bg)
         self.menu.configure(background=entry_bg)
         self.menu.configure(foreground=fg)
+        self.about.configure(background=bg)
 
         if self._global_scroller:
             self._global_scroller.configure(background=bg, foreground=fg,
@@ -128,8 +118,8 @@ class Gui():
             self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg if darkmode_enabled else None,
-                disabledforeground=disabled_fg if darkmode_enabled else None
+                disabledbackground=disabled_bg if color.dark_mode else None,
+                disabledforeground=disabled_fg if color.dark_mode else None
             )
 
             checkbox_state = self.toggle_vars[index].get()
@@ -139,6 +129,31 @@ class Gui():
                 highlightbackground=bg,
                 troughcolor=trough_bg if checkbox_state == 1 else disabled_bg
             )
+
+        for widget in self.about.winfo_children():
+            if type(widget) == type(tk.Label()) and "GitHub" in widget['text']:
+                widget.configure(background=bg, foreground=hyperlink_fg)
+            elif type(widget) == type(tk.Button()):
+                widget.configure(background=button_bg, foreground=fg)
+            else:
+                widget.configure(background=bg, foreground=fg)
+
+    """
+    Widget constructions/populations:
+    """
+    def _construct_menu_bar(self):
+        menu = tk.Menu(self.root)
+
+        file = tk.Menu(menu, tearoff=0)
+        file.add_command(label='Preferences', command=None)
+        file.add_command(label='Quit', command=self.root.destroy)
+        help = tk.Menu(menu, tearoff=0)
+        help.add_command(label='About', command=self._open_about_window)
+
+        menu.add_cascade(label='File', menu=file)
+        menu.add_cascade(label='Help', menu=help)
+        self.root.config(menu=menu)
+        return menu
 
     def _populate_monitor_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
@@ -196,6 +211,73 @@ class Gui():
             global_scroller.set(100)  # So that users start scrolling with the max brightness level
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
             self._global_scroller = global_scroller
+
+    """
+    About:
+    """
+    def _construct_about_window(self):
+
+        def openurl(url):
+           webbrowser.open_new_tab(url)
+
+        about_window = tk.Toplevel(self.root)
+        application_name = 'Screen Dimmer'  # TODO - get via config/constants file
+        application_version = '2.0.0'  # TODO - same with above
+        current_year = datetime.datetime.now().date().strftime("%Y")
+
+        about_window.attributes('-type', 'dialog')
+        # about_window.geometry('350x200')
+        about_window.title(f"About - {application_name} Ver {application_version}")
+        image = tk.Label(about_window, image="::tk::icons::information")
+        image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
+
+        # Copyright:
+        copyright_label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
+            font=10,
+            justify=tk.LEFT,
+        )
+        copyright_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+
+        # GitHub link:
+        github_label = tk.Label(about_window, text="View on GitHub",
+            font=10,
+            fg="blue",
+            cursor="hand2"
+        )
+        github_label.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
+        github_label.bind("<Button-1>", lambda e:
+            openurl("https://github.com/Lawrence-Chiappelli/screendimmer")
+        )
+
+        # Contact:
+        # TODO: can't copy and paste this label, may want to use tk.Text() intead
+        contact_label = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
+            font=10,
+            justify=tk.LEFT,
+        )
+        contact_label.grid(row=2, column=1, sticky=tk.W, pady=(0, 20))
+
+        # Ok button:
+        button = tk.Button(about_window, text="Close", command=self._close_about_window)
+        button.grid(row=3, column=0, columnspan=2, sticky=tk.S, pady=(0,20))
+        button.bind('<Return>', self._close_about_window)
+
+        about_window.withdraw()  # By default, the about window will show - unless we tell it not to
+        about_window.bind('<Escape>', self._close_about_window)
+        about_window.bind('<Return>', self._close_about_window)
+        return about_window
+
+    def _open_about_window(self):
+        self.about.deiconify()
+        self.root.withdraw()
+
+    def _close_about_window(self, *args):
+        self.about.withdraw()
+        self.root.deiconify()
+
+    """
+    Callbacks:
+    """
 
     def _attach_brightness_callbacks(self):
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
@@ -269,63 +351,3 @@ class Gui():
             self._inputs[i].config(state=tk.NORMAL)
 
         self._configure_theme()
-
-    def _construct_about_window(self):
-
-        def openurl(url):
-           webbrowser.open_new_tab(url)
-
-        about_window = tk.Toplevel(self.root)
-        application_name = 'Screen Dimmer'  # TODO - get via config/constants file
-        application_version = '2.0.0'  # TODO - same with above
-        current_year = datetime.datetime.now().date().strftime("%Y")
-
-        about_window.attributes('-type', 'dialog')
-        # about_window.geometry('350x200')
-        about_window.title(f"About - {application_name} Ver {application_version}")
-        image = tk.Label(about_window, image="::tk::icons::information")
-        image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
-
-        # Copyright:
-        copyright_label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
-            font=10,
-            justify=tk.LEFT,
-        )
-        copyright_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
-
-        # GitHub link:
-        github_label = tk.Label(about_window, text="View on GitHub",
-            font=10,
-            fg="blue",
-            cursor="hand2"
-        )
-        github_label.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
-        github_label.bind("<Button-1>", lambda e:
-            openurl("https://github.com/Lawrence-Chiappelli/screendimmer")
-        )
-
-        # Contact:
-        # TODO: can't copy and paste this label, may want to use tk.Text() intead
-        contact_label = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
-            font=10,
-            justify=tk.LEFT,
-        )
-        contact_label.grid(row=2, column=1, sticky=tk.W, pady=(0, 20))
-
-        # Ok button:
-        button = tk.Button(about_window, text="Close", command=self._close_about_window)
-        button.grid(row=3, column=0, columnspan=2, sticky=tk.S, pady=(0,20))
-        button.bind('<Return>', self._close_about_window)
-
-        about_window.withdraw()  # By default, the about window will show - unless we tell it not to
-        about_window.bind('<Escape>', self._close_about_window)
-        about_window.bind('<Return>', self._close_about_window)
-        return about_window
-
-    def _open_about_window(self):
-        self.about.deiconify()
-        self.root.withdraw()
-
-    def _close_about_window(self, *args):
-        self.about.withdraw()
-        self.root.deiconify()
