@@ -287,32 +287,39 @@ class Gui():
         image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
 
         # Copyright:
-        copyright_string = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
+        copyright_label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
             font=10,
             justify=tk.LEFT,
         )
-        copyright_string.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        copyright_label.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
 
         # GitHub link:
-        github_string = tk.Label(about_window, text="View on GitHub",
+        github_label = tk.Label(about_window, text="View on GitHub",
             font=10,
             fg="blue",
             cursor="hand2"
         )
-        github_string.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
-        github_string.bind("<Button-1>", lambda e:
+        github_label.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
+        github_label.bind("<Button-1>", lambda e:
             openurl("https://github.com/Lawrence-Chiappelli/screendimmer")
         )
 
         # Contact:
-        contact_string = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
+        # TODO: can't copy and paste this label, may want to use tk.Text() intead
+        contact_label = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
             font=10,
             justify=tk.LEFT,
         )
-        contact_string.grid(row=2, column=1, sticky=tk.W, pady=(0, 20))
+        contact_label.grid(row=2, column=1, sticky=tk.W, pady=(0, 20))
+
+        # Ok button:
+        button = tk.Button(about_window, text="Close", command=self._close_about_window)
+        button.grid(row=3, column=0, columnspan=2, sticky=tk.S, pady=(0,20))
+        button.bind('<Return>', self._close_about_window)
 
         about_window.withdraw()  # By default, the about window will show - unless we tell it not to
         about_window.bind('<Escape>', self._close_about_window)
+        about_window.bind('<Return>', self._close_about_window)
         return about_window
 
     def _open_about_window(self):
