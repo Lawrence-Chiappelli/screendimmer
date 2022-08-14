@@ -1,7 +1,11 @@
+import configutil
+
+config = configutil.get_parsed_config()
+
 class Colors:
 
     def __init__(self):
-        self.dark_mode=False # TODO: determine with config parser
+        self.dark_mode=eval(config['theme']['darkmode'])
 
         self.bg=self.DarkMode().bg if self.dark_mode else self.LightMode().bg
         self.fg=self.DarkMode().fg if self.dark_mode else self.LightMode().fg
