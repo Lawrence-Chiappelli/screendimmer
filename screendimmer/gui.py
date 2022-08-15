@@ -57,6 +57,7 @@ class Gui():
         # Preference vars:
         self.theme = tk.StringVar(value=color.get_darkmode() if color.is_darkmode_active() is True else color.get_lightmode())
         self.save_on_exit = tk.IntVar(value=1)
+        self.restore_on_exit = tk.IntVar(value=1)
 
         """Tkinter GUI elements"""
 
@@ -102,8 +103,9 @@ class Gui():
         hyperlink_fg = color.get_hyperlink_foreground_color()
 
         self.root.configure(background=bg)
-        self.menu.configure(background=entry_bg)
-        self.menu.configure(foreground=fg)
+        self.about.configure(background=bg)
+        self.preferences.configure(background=bg)
+        self.menu.configure(background=entry_bg, foreground=fg)
 
         if self._global_scroller:
             self._global_scroller.configure(background=bg, foreground=fg,
@@ -133,7 +135,7 @@ class Gui():
                 troughcolor=trough_bg if checkbox_state == 1 else disabled_bg
             )
 
-        self.about.configure(background=bg)
+
         for widget in self.about.winfo_children():
             if type(widget) == type(tk.Label()) and "GitHub" in widget['text']:
                 widget.configure(background=bg, foreground=hyperlink_fg)
@@ -142,9 +144,22 @@ class Gui():
             else:
                 widget.configure(background=bg, foreground=fg)
 
-        self.preferences.configure(background=fg)
         for widget in self.preferences.winfo_children():
-            widget.configure(background=bg, foreground=fg)
+            if type(widget) == type(tk.Label()):
+                widget.configure(background=bg, foreground=fg)
+            elif type(widget) == type(tk.Checkbutton()):
+                widget.configure(background=bg, foreground=fg,
+                    highlightbackground=bg,
+                    activebackground=scrollbar_bg,
+                    selectcolor=entry_bg
+                )
+            elif type(widget) == type(tk.OptionMenu(None, None, None)):
+                widget.configure(background=button_bg, foreground=fg,
+                    highlightbackground=bg,
+                    activebackground=scrollbar_bg,
+                )
+            else:
+                widget.configure(background=bg, foreground=fg)
 
     """
     Widget constructions/populations:
@@ -292,17 +307,14 @@ class Gui():
         preferences_window.attributes('-type', 'dialog')
         preferences_window.title(f"Preferences")
 
-        x = 4
-        y = 4
-
         label_theme = tk.Label(preferences_window, text='Theme:')
-        label_theme.grid(row=0, column=0, padx=x, pady=y, sticky=tk.W)
+        label_theme.grid(row=0, column=0, padx=4, pady=4, sticky=tk.W)
 
         theme_select = tk.OptionMenu(preferences_window, self.theme, *color.get_all_themes())
-        theme_select.grid(row=0, column=1, padx=x, pady=y)
+        theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 
-        checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save brightnesses on exit",
-            variable=self.save_on_exit,  # TODO: <---- this isn't working
+        checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save monitor config on exit",
+            variable=self.save_on_exit,
             onvalue=1,
             offvalue=0
         )
@@ -310,7 +322,19 @@ class Gui():
             columnspan=2,
             sticky=tk.W,
             padx=0,
-            pady=y
+            pady=4
+        )
+
+        checkbox_restore_on_exit = tk.Checkbutton(preferences_window, text="Set brightnesses to 100% on exit",
+            variable=self.restore_on_exit,
+            onvalue=1,
+            offvalue=0
+        )
+        checkbox_restore_on_exit.grid(row=2, column=0,
+            columnspan=2,
+            sticky=tk.W,
+            padx=(0, 4),
+            pady=4
         )
 
         return preferences_window
