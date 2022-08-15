@@ -147,6 +147,8 @@ class Gui():
         for widget in self.preferences.winfo_children():
             if type(widget) == type(tk.Label()):
                 widget.configure(background=bg, foreground=fg)
+            elif type(widget) == type(tk.Button()):
+                widget.configure(background=button_bg, foreground=fg)
             elif type(widget) == type(tk.Checkbutton()):
                 widget.configure(background=bg, foreground=fg,
                     highlightbackground=bg,
@@ -337,8 +339,13 @@ class Gui():
             pady=4
         )
 
+        button_confirm = tk.Button(preferences_window, text="Confirm", command=self._close_preferences_window)
+        button_confirm.grid(row=3, column=0, columnspan=2, sticky=tk.N, pady=15)
+        button_confirm.bind('<Return>', self._close_preferences_window)
+
         preferences_window.withdraw()  # By default, the about window will show - unless we tell it not to
         preferences_window.bind('<Escape>', self._close_preferences_window)
+        preferences_window.bind('<Return>', self._close_preferences_window)
         return preferences_window
 
     def _open_preferences_window(self):
