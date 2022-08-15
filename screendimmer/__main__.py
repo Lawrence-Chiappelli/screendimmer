@@ -1,5 +1,6 @@
 import session
 import gui
+import xrandr
 
 if __name__ == '__main__':
     sesh = session.Session()
@@ -26,3 +27,9 @@ if __name__ == '__main__':
 
     tray.construct_gui()
     tray.start()
+
+    # When the application is exited, reset the brightnesses
+    for monitor in monitors:
+        xrandr.set_brightness(monitor, '1.0')
+
+    print("Done")

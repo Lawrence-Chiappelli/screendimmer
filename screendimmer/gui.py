@@ -25,8 +25,9 @@ It allows you explicitly set the position and size of a window, either in absolu
 
 if __name__ == "__main__":
     print("This should not be the main module")
-else:
-    color = colors.Colors()
+    quit()
+
+color = colors.Colors()
 
 
 class Gui():
@@ -42,30 +43,33 @@ class Gui():
         """
 
         self.root = tk.Tk()
-        self.menu = self._construct_menu_bar()
-        self.about = self._construct_about_window()
+
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
         self.brightnesses = [brightness for brightness in brightnesses]
 
-        """
-        Note: the TK vars provide uniqueness for GUI elements, such that
-        they won't share the same states and cause "mirror'ed" behavior.
+        """Tkinter PyVars"""
 
-        Additionally, with clever engineering, these TK vars can be
-        re-used to provide simulatenous dynamic updating between elements
-        (that is, without specifying a command for each element).
-        """
-
+        # Main interface vars:
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
         self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
         self.global_brightness_var = tk.StringVar()
+        # Preference vars:
+        self.theme = tk.StringVar(value=color.get_darkmode() if color.is_darkmode_active() is True else color.get_lightmode())
+        self.save_on_exit = tk.IntVar(value=1)
 
-        """Note: the following tkinter elements are editable after being packed."""
+        """Tkinter GUI elements"""
+
+        # Main interface elements:
         self._toggles = []
         self._inputs = []
         self._scrollers = []
         self._global_scroller = None
+
+        """New windows"""
+        self.menu = self._construct_menu_bar()
+        self.about = self._construct_about_window()
+        self.preferences = self._construct_preferences_window()
 
     def start(self):
         self.root.mainloop()
@@ -100,7 +104,6 @@ class Gui():
         self.root.configure(background=bg)
         self.menu.configure(background=entry_bg)
         self.menu.configure(foreground=fg)
-        self.about.configure(background=bg)
 
         if self._global_scroller:
             self._global_scroller.configure(background=bg, foreground=fg,
@@ -118,8 +121,8 @@ class Gui():
             self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg if color.dark_mode else None,
-                disabledforeground=disabled_fg if color.dark_mode else None
+                disabledbackground=disabled_bg if color.is_darkmode_active() else None,
+                disabledforeground=disabled_fg if color.is_darkmode_active() else None
             )
 
             checkbox_state = self.toggle_vars[index].get()
@@ -130,6 +133,7 @@ class Gui():
                 troughcolor=trough_bg if checkbox_state == 1 else disabled_bg
             )
 
+        self.about.configure(background=bg)
         for widget in self.about.winfo_children():
             if type(widget) == type(tk.Label()) and "GitHub" in widget['text']:
                 widget.configure(background=bg, foreground=hyperlink_fg)
@@ -137,6 +141,10 @@ class Gui():
                 widget.configure(background=button_bg, foreground=fg)
             else:
                 widget.configure(background=bg, foreground=fg)
+
+        self.preferences.configure(background=fg)
+        for widget in self.preferences.winfo_children():
+            widget.configure(background=bg, foreground=fg)
 
     """
     Widget constructions/populations:
@@ -213,7 +221,7 @@ class Gui():
             self._global_scroller = global_scroller
 
     """
-    About:
+    About window:
     """
     def _construct_about_window(self):
 
@@ -226,7 +234,6 @@ class Gui():
         current_year = datetime.datetime.now().date().strftime("%Y")
 
         about_window.attributes('-type', 'dialog')
-        # about_window.geometry('350x200')
         about_window.title(f"About - {application_name} Ver {application_version}")
         image = tk.Label(about_window, image="::tk::icons::information")
         image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
@@ -276,9 +283,41 @@ class Gui():
         self.root.deiconify()
 
     """
+    Preferences window:
+    """
+    def _construct_preferences_window(self):
+        preferences_window = tk.Toplevel(self.root)
+        application_name = 'Screen Dimmer'
+
+        preferences_window.attributes('-type', 'dialog')
+        preferences_window.title(f"Preferences")
+
+        x = 4
+        y = 4
+
+        label_theme = tk.Label(preferences_window, text='Theme:')
+        label_theme.grid(row=0, column=0, padx=x, pady=y, sticky=tk.W)
+
+        theme_select = tk.OptionMenu(preferences_window, self.theme, *color.get_all_themes())
+        theme_select.grid(row=0, column=1, padx=x, pady=y)
+
+        checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save brightnesses on exit",
+            variable=self.save_on_exit,  # TODO: <---- this isn't working
+            onvalue=1,
+            offvalue=0
+        )
+        checkbox_save_on_exit.grid(row=1, column=0,
+            columnspan=2,
+            sticky=tk.W,
+            padx=0,
+            pady=y
+        )
+
+        return preferences_window
+
+    """
     Callbacks:
     """
-
     def _attach_brightness_callbacks(self):
         """Attach listeners to brightness variables for dynamic brightness adjusting behavior"""
 
