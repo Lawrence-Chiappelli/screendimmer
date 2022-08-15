@@ -168,7 +168,7 @@ class Gui():
         menu = tk.Menu(self.root)
 
         file = tk.Menu(menu, tearoff=0)
-        file.add_command(label='Preferences', command=None)
+        file.add_command(label='Preferences', command=self._open_preferences_window)
         file.add_command(label='Quit', command=self.root.destroy)
         help = tk.Menu(menu, tearoff=0)
         help.add_command(label='About', command=self._open_about_window)
@@ -337,7 +337,17 @@ class Gui():
             pady=4
         )
 
+        preferences_window.withdraw()  # By default, the about window will show - unless we tell it not to
+        preferences_window.bind('<Escape>', self._close_preferences_window)
         return preferences_window
+
+    def _open_preferences_window(self):
+        self.preferences.deiconify()
+        self.root.withdraw()
+
+    def _close_preferences_window(self, *args):
+        self.preferences.withdraw()
+        self.root.deiconify()
 
     """
     Callbacks:
