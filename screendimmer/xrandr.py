@@ -112,6 +112,7 @@ def set_brightness(monitor_name: str, brightness_value: str):
         brightness_value
     ]
 
+    print('invoking', brightness_value)
     invoke_shell_command(xrandr_command)
 
 if __name__ == '__main__':

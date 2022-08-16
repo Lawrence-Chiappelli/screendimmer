@@ -3,12 +3,12 @@ import xrandr
 class Session():
 
     def __init__(self):
-        self.setup = self.generate_setup()
+        self.setup = self._generate_setup()
         self.monitors = [m[0] for m in self.setup.values()]
         self.brightnesses = [b[1] for b in self.setup.values()]
         self.resolutions = [r[2] for r in self.setup.values()]
 
-    def generate_setup(self):
+    def _generate_setup(self):
         """Determine the user's setup. Once per function call.
 
         @return (dict): {'DisplayPort-2', 0.70}
@@ -65,3 +65,14 @@ class Session():
 
     def get_resolutions(self):
         return self.resolutions
+
+    def append_temporary_test_data(self):
+        self.monitors.append('TEST-1')
+        self.resolutions.append('1920x1080')
+        self.brightnesses.append('0.8')
+
+    def consult_config_for_monitors(self):
+        pass
+
+    def __str__(self):
+        return f"Your setup: {self.setup}"

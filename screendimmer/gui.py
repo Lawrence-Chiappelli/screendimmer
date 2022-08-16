@@ -4,6 +4,7 @@ import webbrowser
 import utils
 import xrandr
 import colors
+import configutils
 import preferences
 
 from tkinter import messagebox
@@ -20,7 +21,29 @@ if __name__ == "__main__":
     print("This should be an imported module")
     quit()
 
-preference = preferences.Preferences()
+
+configutilities = configutils.Config()
+configfile = configutilities.get_configuration_file()
+preferences = preferences.Preferences(configfile)
+
+
+def save_monitor_config(self, monitor: str, brightness: str):
+    # TODO: where do I abstract this function? It's not a preference.
+    if configfile:
+        if brightness.isnumeric():
+            brightness = utils.convert_converted_brightness_to_xrandr(brightness)
+        configfile['brightnesses'][monitor.lower()] = brightness
+        configutilities.save()
+
+
+def get_brightness(self, monitor: str):
+    # TODO: same with the above
+    if configfile:
+        brightness_value = configfile['brightnesses'][monitor]
+        return brightness_value
+    else:
+        return '1.0'
+
 
 class Gui():
 
@@ -44,12 +67,16 @@ class Gui():
 
         # Main interface vars:
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
-        self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
         self.global_brightness_var = tk.StringVar()
+        self.brightness_vars = [tk.StringVar(
+            value=preferences.get_brightness(self.monitors[i]))
+            for i, brightness in enumerate(self.brightnesses)
+        ]
+
         # Preference vars:
-        self.theme = tk.StringVar(value=preference.get_theme())
-        self.save_on_exit_var = tk.IntVar(value=preference.get_save_on_exit())
-        self.restore_on_exit_var = tk.IntVar(value=preference.get_restore_on_exit())
+        self.theme = tk.StringVar(value=preferences.get_theme())
+        self.save_on_exit_var = tk.IntVar(value=preferences.get_save_on_exit())
+        self.restore_on_exit_var = tk.IntVar(value=preferences.get_restore_on_exit())
 
         """Tkinter GUI elements"""
 
@@ -84,7 +111,7 @@ class Gui():
         self.root.title("Screen Dimmer")
 
     def _apply_theme(self):
-        theme = preference.get_theme()
+        theme = preferences.get_theme()
 
         bg = theme.get_background_color()
         fg = theme.get_foreground_color()
@@ -117,8 +144,8 @@ class Gui():
             self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg if preference.is_dark_mode_enabled() else None,
-                disabledforeground=disabled_fg if preference.is_dark_mode_enabled() else None
+                disabledbackground=disabled_bg if preferences.is_dark_mode_enabled() else None,
+                disabledforeground=disabled_fg if preferences.is_dark_mode_enabled() else None
             )
 
             checkbox_state = self.toggle_vars[index].get()
@@ -306,7 +333,7 @@ class Gui():
         label_theme = tk.Label(preferences_window, text='Theme:')
         label_theme.grid(row=0, column=0, padx=4, pady=4, sticky=tk.W)
 
-        all_themes = preference.get_all_available_themes()
+        all_themes = preferences.get_all_available_themes()
         theme_select = tk.OptionMenu(preferences_window, self.theme, *all_themes, command=self._theme_handler_callback)
         theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 
@@ -432,11 +459,11 @@ class Gui():
         self._apply_theme()
 
     def _theme_handler_callback(self, selected_theme_as_class):
-        preference.save_new_theme(selected_theme_as_class)
+        preferences.save_new_theme(selected_theme_as_class)
         self._apply_theme()
 
     def _save_on_exit_handler_callback(self):
-        preference.apply_save_on_exit(self.save_on_exit_var.get())
+        preferences.apply_save_on_exit(self.save_on_exit_var.get())
 
     def _restore_on_exit_handler_callback(self):
-        preference.apply_restore_on_exit(self.restore_on_exit_var.get())
+        preferences.apply_restore_on_exit(self.restore_on_exit_var.get())
