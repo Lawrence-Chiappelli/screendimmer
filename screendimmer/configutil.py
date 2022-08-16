@@ -28,38 +28,7 @@ def retrieve_configuration_file():
         return None
 
 
-def overwrite_config_section(section: str, section_items: list):
-
-    """
-    :param section: The name of the section category
-    :param section_items: For iterating over the section
-    :return: None
-    """
-
-    if list(config[section]) == section_items:
-        return  # No need to overwrite for equivalent lists
-
-    def _converted_to_key(obj):
-        return str(obj).replace(" ", "").lower()
-
-    for item in section_items:
-        key = _converted_to_key(item)
-        config[section][key] = item
-
-
-def write_brightness(brightness_level: str):
-
-    """
-    :param brightness_level: Brightness level to write
-    to config file. Does not necessarily save the
-    changes to storage. Call save_changes() if
-    you'd like to save the written changes.
-    """
-
-    config['brightness']['level'] = brightness_level
-
-
-def save_changes():
+def save():
 
     with open(path_to_config, 'w') as new_changes:
         config.write(new_changes)
@@ -93,18 +62,6 @@ def print_specific_section_items_for_verification(section_name: str):
     for item in config[section_name].items():
         print(f"{item[0]} = {item[1]}")
     print(f"")
-
-
-def get_key_name_as_convention(desired_name: str):
-
-    """
-    :param desired_name: The name you would
-    like to convert
-    :return: The key name as a personal
-    convention I'm using for brightness.ini
-    """
-
-    return desired_name.lower().replace(" ", "").replace(":", "")
 
 
 def get_ini_path(file_name='config.ini', pkgname='screendimmer', in_production=True, continue_if_not_found=True):

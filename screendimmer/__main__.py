@@ -33,6 +33,8 @@ if __name__ == '__main__':
     preference = preferences.Preferences()
 
     if preference.get_save_on_exit():
+        for i in range(len(monitors)):
+            preference.save_monitor_config(monitors[i], brightnesses[i])
         pass  # TODO: clear config on exit?
 
     if preference.get_restore_on_exit():

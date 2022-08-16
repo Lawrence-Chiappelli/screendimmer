@@ -1,11 +1,11 @@
 import colors
 import configutil
 
-config = configutil.retrieve_configuration_file()
-
 class Preferences:
 
     def __init__(self):
+        self._config = configutil.retrieve_configuration_file()
+
         self.theme = self.set_theme()  # <--- the class, not the str representation
         self.save_on_exit = self.set_save_on_exit()
         self.restore_on_exit = self.set_restore_on_exit()
@@ -26,8 +26,8 @@ class Preferences:
         return all_themes
 
     def set_theme(self):
-        if config:
-            theme_value = config['color']['theme']
+        if self._config:
+            theme_value = self._config['color']['theme']
             for theme in self.get_all_available_themes():
                 if theme.__str__() == theme_value:
                     return theme
@@ -35,15 +35,15 @@ class Preferences:
         return colors.DarkMode()
 
     def set_save_on_exit(self):
-        if config:
-            if eval(config['preferences']['save_on_exit']):
+        if self._config:
+            if eval(self._config['preferences']['save_on_exit']):
                 return True
 
         return False
 
     def set_restore_on_exit(self):
-        if config:
-            if eval(config['preferences']['save_on_exit']):
+        if self._config:
+            if eval(self._config['preferences']['save_on_exit']):
                 return True
 
         return True
@@ -55,25 +55,30 @@ class Preferences:
             return False
 
     def save_new_theme(self, theme_class):
-        if config:
-            config['color']['theme'] = theme_class.__str__()
-            configutil.save_changes()
+        if self._config:
+            self._config['color']['theme'] = theme_class.__str__()
+            configutil.save()
 
         self.theme = theme_class
 
     def apply_save_on_exit(self, selected_value: int):
-        if config:
-            config['preferences']['save_on_exit'] = str(bool(selected_value))
-            configutil.save_changes()
+        if self._config:
+            self._config['preferences']['save_on_exit'] = str(bool(selected_value))
+            configutil.save()
 
         self.save_on_exit = selected_value
 
     def apply_restore_on_exit(self, selected_value: int):
-        if config:
-            config['preferences']['restore_on_exit'] = str(bool(selected_value))
-            configutil.save_changes()
+        if self._config:
+            self._config['preferences']['restore_on_exit'] = str(bool(selected_value))
+            configutil.save()
 
         self.save_on_exit = selected_value
+
+    def save_monitor_config(self, monitor: str, brightness: str):
+        if self._config:
+            self._config['monitors'][monitor] = brightness
+            configutil.save()
 
     def __str__(self):
         return self.theme.__str__()

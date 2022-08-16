@@ -17,7 +17,7 @@ extra/tk     8.6.12-1       4.79 MiB
 """
 
 if __name__ == "__main__":
-    print("This should not be the main module")
+    print("This should be an imported module")
     quit()
 
 preference = preferences.Preferences()

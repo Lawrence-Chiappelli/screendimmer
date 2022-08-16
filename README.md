@@ -92,7 +92,7 @@ However, if you are inclined to contribute to the codebase with a predefined tas
 
 | Task      | Description                       |
 | :-------- | :-------------------------------- |
-| Dynamic monitor detection | Dynamically updated the GUI interface as monitor changes are detected |
+| Dynamic monitor detection | Dynamically update the GUI interface as monitor changes are detected |
 | Monitor order detection | Display the order of the monitors in which they are positioned by xrandr |
 | Refactor `gui.py` | Simplify infrastructure for ease of developer maintenance and scalability |
 | More docstrings | Enhance user readability and interpretation speed by supplying more docs |
