@@ -6,7 +6,7 @@ config = configutil.retrieve_configuration_file()
 class Preferences:
 
     def __init__(self):
-        self.theme = self.set_theme()
+        self.theme = self.set_theme()  # <--- the class, not the str representation
         self.save_on_exit = self.set_save_on_exit()
         self.restore_on_exit = self.set_restore_on_exit()
 
@@ -55,15 +55,25 @@ class Preferences:
             return False
 
     def save_new_theme(self, theme_class):
-        if type(theme_class) is str:
-            raise TypeError("The passed theme should be an object\
-            and not the str representation")
-
         if config:
             config['color']['theme'] = theme_class.__str__()
             configutil.save_changes()
 
         self.theme = theme_class
+
+    def apply_save_on_exit(self, selected_value: int):
+        if config:
+            config['preferences']['save_on_exit'] = str(bool(selected_value))
+            configutil.save_changes()
+
+        self.save_on_exit = selected_value
+
+    def apply_restore_on_exit(self, selected_value: int):
+        if config:
+            config['preferences']['restore_on_exit'] = str(bool(selected_value))
+            configutil.save_changes()
+
+        self.save_on_exit = selected_value
 
     def __str__(self):
         return self.theme.__str__()

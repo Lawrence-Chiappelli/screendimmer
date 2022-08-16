@@ -48,8 +48,8 @@ class Gui():
         self.global_brightness_var = tk.StringVar()
         # Preference vars:
         self.theme = tk.StringVar(value=preference.get_theme())
-        self.save_on_exit = tk.IntVar(value=preference.get_save_on_exit())
-        self.restore_on_exit = tk.IntVar(value=preference.get_restore_on_exit())
+        self.save_on_exit_var = tk.IntVar(value=preference.get_save_on_exit())
+        self.restore_on_exit_var = tk.IntVar(value=preference.get_restore_on_exit())
 
         """Tkinter GUI elements"""
 
@@ -312,9 +312,10 @@ class Gui():
 
         # Save on exit:
         checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save monitor config on exit",
-            variable=self.save_on_exit,
+            variable=self.save_on_exit_var,
+            command=self._save_on_exit_handler_callback,
             onvalue=1,
-            offvalue=0
+            offvalue=0,
         )
         checkbox_save_on_exit.grid(row=1, column=0,
             columnspan=2,
@@ -325,7 +326,8 @@ class Gui():
 
         # Restore on exit:
         checkbox_restore_on_exit = tk.Checkbutton(preferences_window, text="Set brightnesses to 100% on exit",
-            variable=self.restore_on_exit,
+            variable=self.restore_on_exit_var,
+            command=self._restore_on_exit_handler_callback,
             onvalue=1,
             offvalue=0
         )
@@ -432,3 +434,9 @@ class Gui():
     def _theme_handler_callback(self, selected_theme_as_class):
         preference.save_new_theme(selected_theme_as_class)
         self._apply_theme()
+
+    def _save_on_exit_handler_callback(self):
+        preference.apply_save_on_exit(self.save_on_exit_var.get())
+
+    def _restore_on_exit_handler_callback(self):
+        preference.apply_restore_on_exit(self.restore_on_exit_var.get())
