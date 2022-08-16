@@ -8,9 +8,7 @@ class Preferences:
     def __init__(self):
         self.theme = self.set_theme()
         self.save_on_exit = self.set_save_on_exit()
-        self.reset_on_exit = self.set_reset_on_exit()
-
-        print(self.__dict__)
+        self.restore_on_exit = self.set_restore_on_exit()
 
     def get_theme(self):
         return self.theme
@@ -18,8 +16,8 @@ class Preferences:
     def get_save_on_exit(self):
         return self.save_on_exit
 
-    def get_reset_on_exit(self):
-        return self.reset_on_exit
+    def get_restore_on_exit(self):
+        return self.restore_on_exit
 
     def set_theme(self):
         if config:
@@ -35,7 +33,7 @@ class Preferences:
 
         return False
 
-    def set_reset_on_exit(self):
+    def set_restore_on_exit(self):
         if config:
             if eval(config['preferences']['save_on_exit']):
                 return True

@@ -48,8 +48,8 @@ class Gui():
         self.global_brightness_var = tk.StringVar()
         # Preference vars:
         self.theme = tk.StringVar(value=preference.get_theme())
-        self.save_on_exit = tk.IntVar(value=1)
-        self.restore_on_exit = tk.IntVar(value=1)
+        self.save_on_exit = tk.IntVar(value=preference.get_save_on_exit())
+        self.restore_on_exit = tk.IntVar(value=preference.get_restore_on_exit())
 
         """Tkinter GUI elements"""
 
