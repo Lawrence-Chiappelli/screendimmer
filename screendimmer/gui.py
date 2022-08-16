@@ -74,7 +74,7 @@ class Gui():
         self._populate_brightness_inputs()
         self._populate_brightness_scrollers()
         self._attach_brightness_callbacks()
-        self._configure_theme()
+        self._apply_theme()
 
     """
     Various data configurators:
@@ -83,7 +83,7 @@ class Gui():
         self.root.attributes('-type', 'dialog')
         self.root.title("Screen Dimmer")
 
-    def _configure_theme(self):
+    def _apply_theme(self):
         theme = preference.get_theme()
 
         bg = theme.get_background_color()
@@ -306,10 +306,8 @@ class Gui():
         label_theme = tk.Label(preferences_window, text='Theme:')
         label_theme.grid(row=0, column=0, padx=4, pady=4, sticky=tk.W)
 
-        class_names = [member for member in dir(colors)[1:] if not member.startswith("__")]
-        all_themes = [getattr(colors, class_name)().__str__() for class_name in class_names]
-
-        theme_select = tk.OptionMenu(preferences_window, self.theme, *all_themes)
+        all_themes = preference.get_all_available_themes()
+        theme_select = tk.OptionMenu(preferences_window, self.theme, *all_themes, command=self._theme_handler_callback)
         theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 
         # Save on exit:
@@ -429,4 +427,8 @@ class Gui():
             self._scrollers[i].config(state=tk.NORMAL)
             self._inputs[i].config(state=tk.NORMAL)
 
-        self._configure_theme()
+        self._apply_theme()
+
+    def _theme_handler_callback(self, selected_theme: str):
+        preference.set_new_theme(selected_theme)
+        self._apply_theme()

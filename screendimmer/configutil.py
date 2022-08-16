@@ -9,7 +9,7 @@ A glorified wrapper for configparses and parsing .ini configuration files.
 To get your config contents, edit and call retrieve_configuration_file.
 
 That function will automate the steps that need to be taken
-care of before your config file can be used.
+care of before your config file can be used!
 """
 
 config = configparser.ConfigParser()  # <--- initially empty
