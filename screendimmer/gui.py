@@ -429,6 +429,6 @@ class Gui():
 
         self._apply_theme()
 
-    def _theme_handler_callback(self, selected_theme: str):
-        preference.set_new_theme(selected_theme)
+    def _theme_handler_callback(self, selected_theme_as_class):
+        preference.save_new_theme(selected_theme_as_class)
         self._apply_theme()

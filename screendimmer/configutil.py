@@ -21,14 +21,7 @@ def retrieve_configuration_file():
     @raise type: [description]
     """
 
-    path_to_config = get_ini_path(
-        file_name='config.ini',
-        pkgname='screendimmer',
-        in_production=False,
-        continue_if_not_found=True
-    )
     config.read(path_to_config, encoding='utf-8')
-
     if config and path_to_config:
         return config
     else:
@@ -68,7 +61,7 @@ def write_brightness(brightness_level: str):
 
 def save_changes():
 
-    with open(ini_config, 'w') as new_changes:
+    with open(path_to_config, 'w') as new_changes:
         config.write(new_changes)
 
 
@@ -155,4 +148,12 @@ def get_ini_path(file_name='config.ini', pkgname='screendimmer', in_production=T
 
 
 if __name__ == 'main':
-    print(f"This should not be the main module")
+    print(f"This should be an imported module")
+
+# Edit this:
+path_to_config = get_ini_path(
+    file_name='config.ini',
+    pkgname='screendimmer',
+    in_production=False,
+    continue_if_not_found=True
+)
