@@ -1,48 +1,28 @@
-import configutil
+"""
+Color-related constants ONLY.
 
-config = configutil.retrieve_configuration_file()
+If you want a theme, return any one of the below SUBclasses,
+and do so somewhere else.
+
+Example:
+import colors
+theme = colors.DarkMode()
+"""
 
 class Colors:
 
-    def __init__(self):
-        self.is_dark_mode=self.set_darkmode_state()
-        self.dark_mode_repr=self.DarkMode()
-        self.light_mode_repr=self.LightMode()
+    def __init__(self, bg, fg, entry_bg, button_bg, trough_bg, scrollbar_bg, disabled_bg, disabled_fg, hyperlink_fg):
+        self.bg=bg
+        self.fg=fg
+        self.entry_bg=entry_bg
+        self.button_bg=button_bg
+        self.trough_bg=trough_bg
+        self.scrollbar_bg=scrollbar_bg
+        self.disabled_bg=disabled_bg
+        self.disabled_fg=disabled_fg
+        self.hyperlink_fg=hyperlink_fg
 
-        self.bg=self.DarkMode().bg if self.is_dark_mode else self.LightMode().bg
-        self.fg=self.DarkMode().fg if self.is_dark_mode else self.LightMode().fg
-        self.entry_bg=self.DarkMode().entry_bg if self.is_dark_mode else self.LightMode().entry_bg
-        self.button_bg=self.DarkMode().button_bg if self.is_dark_mode else self.LightMode().button_bg
-        self.trough_bg=self.DarkMode().trough_bg if self.is_dark_mode else self.LightMode().trough_bg
-        self.scrollbar_bg=self.DarkMode().scrollbar_bg if self.is_dark_mode else self.LightMode().scrollbar_bg
-        self.disabled_bg=self.DarkMode().disabled_bg if self.is_dark_mode else self.LightMode().disabled_bg
-        self.disabled_fg=self.DarkMode().disabled_fg if self.is_dark_mode else self.LightMode().disabled_fg
-        self.hyperlink_fg=self.DarkMode().hyperlink_fg if self.is_dark_mode else self.LightMode().hyperlink_fg
-
-    def set_darkmode_state(self):
-        """Return the darkmode state as specified in the user configuration file.
-
-        The default is True, and in the event the configuration file was not found,
-        set the default to True anyway.
-        """
-        if config:
-            return eval(config['theme']['darkmode'])
-        else:
-            return True
-
-    def is_darkmode_active(self):
-        """Get the True/False state"""
-        return self.is_dark_mode
-
-    def get_darkmode(self):
-        return self.dark_mode_repr
-
-    def get_lightmode(self):
-        return self.light_mode_repr
-
-    def get_all_themes(self):
-        return [self.dark_mode_repr, self.light_mode_repr]
-
+    # Generally, I just want these human readable functions to be re-used:
     def get_background_color(self):
         """General background color of an element"""
         return self.bg
@@ -79,35 +59,42 @@ class Colors:
         """Hyperlink blue needs to different shades for each mode"""
         return self.hyperlink_fg
 
-    class DarkMode:
-        def __init__(self):
-            self.bg="#26242f"
-            self.fg='#d8d4cf'
-            self.entry_bg="#262525"
-            self.button_bg="#d9d9d9"
-            self.trough_bg="#84828c"
-            self.scrollbar_bg="#735a9b"
-            self.disabled_bg="#444444"
-            self.disabled_fg="#000000"
-            self.hyperlink_fg="lightblue"
+class DarkMode(Colors):
 
-        def __repr__(self):
-            return "Dark Mode"
+    def __init__(self):
+        self.bg="#26242f"
+        self.fg='#d8d4cf'
+        self.entry_bg="#262525"
+        self.button_bg="#d9d9d9"
+        self.trough_bg="#84828c"
+        self.scrollbar_bg="#735a9b"
+        self.disabled_bg="#444444"
+        self.disabled_fg="#000000"
+        self.hyperlink_fg="lightblue"
 
-    class LightMode:
-        def __init__(self):
-            self.bg='#d9d9d9'
-            self.fg='#000000'
-            self.entry_bg="#ffffff"
-            self.button_bg="#d9d9d9"
-            self.trough_bg="#b3b3b3"
-            self.scrollbar_bg="#b3b3b3"
-            self.disabled_bg="#d9d9d9"
-            self.disabled_fg="#a3a3a3"
-            self.hyperlink_fg="blue"
+        super().__init__(*self.__dict__.values())
 
-        def __repr__(self):
-            return "Light Mode"
+    def __str__(self):
+        return "Dark Mode"
+
+class LightMode(Colors):
+
+    def __init__(self):
+        self.bg='#d9d9d9'
+        self.fg='#000000'
+        self.entry_bg="#ffffff"
+        self.button_bg="#d9d9d9"
+        self.trough_bg="#b3b3b3"
+        self.scrollbar_bg="#b3b3b3"
+        self.disabled_bg="#d9d9d9"
+        self.disabled_fg="#a3a3a3"
+        self.hyperlink_fg="blue"
+
+        super().__init__(*self.__dict__.values())
+
+    def __str__(self):
+        return "Light Mode"
 
 if __name__ == '__main__':
-    print("This should not be the main module")
+    print("This should be an imported module.")
+    quit()

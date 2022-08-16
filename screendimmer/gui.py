@@ -4,6 +4,7 @@ import webbrowser
 import utils
 import xrandr
 import colors
+import preferences
 
 from tkinter import messagebox
 from functools import partial
@@ -15,20 +16,11 @@ extra/tcl    8.6.12-3       6.76 MiB
 extra/tk     8.6.12-1       4.79 MiB
 """
 
-"""
-pack() - The Pack geometry manager packs widgets in rows or columns.
-grid() - The Grid geometry manager puts the widgets in a 2-dimensional table.
-The master widget is split into a number of rows and columns, and each “cell” in the resulting table can hold a widget.
-place() - The Place geometry manager is the simplest of the three general geometry managers provided in Tkinter.
-It allows you explicitly set the position and size of a window, either in absolute terms, or relative to another window.
-"""
-
 if __name__ == "__main__":
     print("This should not be the main module")
     quit()
 
-color = colors.Colors()
-
+preference = preferences.Preferences()
 
 class Gui():
 
@@ -55,7 +47,7 @@ class Gui():
         self.brightness_vars = [tk.StringVar(value=utils.convert_xrandr_brightness_to_int(brightness)) for brightness in self.brightnesses]
         self.global_brightness_var = tk.StringVar()
         # Preference vars:
-        self.theme = tk.StringVar(value=color.get_darkmode() if color.is_darkmode_active() is True else color.get_lightmode())
+        self.theme = tk.StringVar(value=preference.get_theme())
         self.save_on_exit = tk.IntVar(value=1)
         self.restore_on_exit = tk.IntVar(value=1)
 
@@ -76,7 +68,7 @@ class Gui():
         self.root.mainloop()
 
     def construct_gui(self):
-        """Construct the GUI with data, elements, callbacks and color"""
+        """Construct the GUI with data, elements, callbacks and theme"""
         self._configure_metadata()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
@@ -92,15 +84,17 @@ class Gui():
         self.root.title("Screen Dimmer")
 
     def _configure_theme(self):
-        bg = color.get_background_color()
-        fg = color.get_foreground_color()
-        entry_bg = color.get_entry_background_color()
-        trough_bg = color.get_trough_background_color()
-        button_bg = color.get_button_background_color()
-        scrollbar_bg = color.get_scrollbar_background_color()
-        disabled_bg = color.get_disabled_background_color()
-        disabled_fg = color.get_disabled_foreground_color()
-        hyperlink_fg = color.get_hyperlink_foreground_color()
+        theme = preference.get_theme()
+
+        bg = theme.get_background_color()
+        fg = theme.get_foreground_color()
+        entry_bg = theme.get_entry_background_color()
+        trough_bg = theme.get_trough_background_color()
+        button_bg = theme.get_button_background_color()
+        scrollbar_bg = theme.get_scrollbar_background_color()
+        disabled_bg = theme.get_disabled_background_color()
+        disabled_fg = theme.get_disabled_foreground_color()
+        hyperlink_fg = theme.get_hyperlink_foreground_color()
 
         self.root.configure(background=bg)
         self.about.configure(background=bg)
@@ -123,8 +117,8 @@ class Gui():
             self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg if color.is_darkmode_active() else None,
-                disabledforeground=disabled_fg if color.is_darkmode_active() else None
+                disabledbackground=disabled_bg if preference.is_dark_mode_enabled() else None,
+                disabledforeground=disabled_fg if preference.is_dark_mode_enabled() else None
             )
 
             checkbox_state = self.toggle_vars[index].get()
@@ -312,9 +306,13 @@ class Gui():
         label_theme = tk.Label(preferences_window, text='Theme:')
         label_theme.grid(row=0, column=0, padx=4, pady=4, sticky=tk.W)
 
-        theme_select = tk.OptionMenu(preferences_window, self.theme, *color.get_all_themes())
+        class_names = [member for member in dir(colors)[1:] if not member.startswith("__")]
+        all_themes = [getattr(colors, class_name)().__str__() for class_name in class_names]
+
+        theme_select = tk.OptionMenu(preferences_window, self.theme, *all_themes)
         theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 
+        # Save on exit:
         checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save monitor config on exit",
             variable=self.save_on_exit,
             onvalue=1,
@@ -327,6 +325,7 @@ class Gui():
             pady=4
         )
 
+        # Restore on exit:
         checkbox_restore_on_exit = tk.Checkbutton(preferences_window, text="Set brightnesses to 100% on exit",
             variable=self.restore_on_exit,
             onvalue=1,
