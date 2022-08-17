@@ -12,7 +12,8 @@ class Config:
         in_production=True,
         get_none_if_not_found=True
     ):
-        """Initialize the configuration file with required metadata.
+        """Initialize the configuration FILE using needed parameters.
+        Do NOT initalize with keys/values in constructor.
 
         @param file_name (str): The raw name of your configuration file, include the extension
         @param pkg_name (str): Part of the path, according to Linux file placement conventions (see code)
@@ -30,10 +31,73 @@ class Config:
 
     def save(self):
         with open(self._path_to_config, 'w') as new_changes:
-            config.write(new_changes)
+            self.file.write(new_changes)
 
     def get_configuration_file(self):
         return self.file
+
+    def initialize_config_with_values(self, sections_values_list: list):
+        """Initialize the configuration with new values.
+
+        Note:
+            1) You MUST have [sectionnames] already in your config file!
+            2) The sections_values_list must be in the correct format
+
+        Justification:
+        The assumption here is that an end-user is launching your program
+        for the first time, and your program is written such that your config
+        file cannot contain any keys/values *until* you launch the program
+        first and retrieve them.
+
+        In such a scenario, you may want to use an *automated* function to
+        populate with values - contingent on having the information ready
+        for passing into this function.
+
+        (Nothing is stopping you from doing so manually - but, if you get into
+        that habit, it's very hard to determine where that starts and ends,
+        leading to a confusing and unmaintainable order of events.
+        That's just my opinion.)
+
+        This function makes checks for section name existence, key name existence,
+        and key value existence.
+        Read below to see how the program responds to a combination of any of
+        the above scenarios. It probably will do what you think it does.
+
+        @param sections_values_list (list): Within this list contains
+        the following dictionaries:
+        {section_name: (section_key, default_value)}
+
+        @return (None): Nothing to return
+        @raise KeyError: If the user failed to have the section name prepared
+        beforehand, abort the program.
+        """
+        for item in sections_values_list:
+            for section_name, value_tuple in item.items():
+                section_key, default_value = value_tuple[0], value_tuple[1]
+                """
+                Note: it is YOUR responsibility to ensure config values types are correct!
+                Remember, we are only initializing values, we are NOT checking for value type correctness.
+                """
+                if self.file.has_section(section_name):
+                    if self.file.has_option(section_name, section_key):
+                        # If the section NAME and KEY exists, we can run into 2 possible scenarios:
+                        #   1) We are missing a value on the key, so assign a new value using the user's default value
+                        #   2) We have the value on the key already, in which case, continue
+                        existing_value = self.file[section_name][section_key]
+                        if existing_value:
+                            continue
+                        else:
+                            print(f"Found a missing value! Assigning with default {default_value}")
+                            self.file[section_name][section_key] = default_value
+                    else:
+                        # Create the section with the default value.
+                        # In this case, there's no existing value, so just assign a default value.
+                        print(f"Creating new config key/value for [{section_name}]: {section_key} = {default_value}")
+                        self.file[section_name][section_key] = default_value
+                else:
+                    raise KeyError(f"Missing section [{section_name}]. This must be manually defined first\n!")
+
+        self.save() if sections_values_list else None
 
     def print_entire_config_for_verification(self):
         for section in self.file.sections():

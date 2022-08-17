@@ -26,7 +26,6 @@ configutilities = configutils.Config()
 configfile = configutilities.get_configuration_file()
 preferences = preferences.Preferences(configfile)
 
-
 def save_monitor_config(self, monitor: str, brightness: str):
     # TODO: where do I abstract this function? It's not a preference.
     if configfile:
