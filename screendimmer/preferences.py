@@ -2,13 +2,12 @@ import utils
 import colors
 import configutils
 
-if __name__ == '__main__':
-    print(f"This should be an imported module")
+configutilities = configutils.Config()
 
 class Preferences:
 
-    def __init__(self, configfile):
-        self._config = configfile
+    def __init__(self):
+        self._config = configutilities.get_configuration_file()
         self.theme = self._set_theme()  # Set the CLASS object, not the STR
         self.save_on_exit = self._set_save_on_exit()
         self.restore_on_exit = self._set_restore_on_exit()
@@ -22,16 +21,10 @@ class Preferences:
     def get_restore_on_exit(self):
         return self.restore_on_exit
 
-    def get_all_available_themes(self):
-        # TODO: relocate?
-        class_names = [member for member in dir(colors)[1:] if not member.startswith("__")]
-        all_themes = [getattr(colors, class_name)() for class_name in class_names]
-        return all_themes
-
     def _set_theme(self):
         if self._config:
             theme_value = self._config['color']['theme']
-            for theme in self.get_all_available_themes():
+            for theme in utils.get_all_available_themes():
                 if theme.__str__() == theme_value:
                     return theme
 
@@ -46,10 +39,10 @@ class Preferences:
 
     def _set_restore_on_exit(self):
         if self._config:
-            if eval(self._config['preferences']['save_on_exit']):
+            if eval(self._config['preferences']['restore_on_exit']):
                 return True
 
-        return True
+        return False
 
     def is_dark_mode_enabled(self):
         if self.theme == colors.DarkMode().__str__():
@@ -76,7 +69,11 @@ class Preferences:
             self._config['preferences']['restore_on_exit'] = str(bool(selected_value))
             configutilities.save()
 
-        self.save_on_exit = selected_value
+        self.restore_on_exit = selected_value
 
     def __str__(self):
         return str(self.__dict__())
+
+
+if __name__ == '__main__':
+    print(f"This should be an imported module")

@@ -7,57 +7,60 @@ and do so somewhere else.
 Example:
 import colors
 theme = colors.DarkMode()
+
+Do not import anything as I am using this file to
+process information related to this module's members.
 """
 
 class Colors:
 
     def __init__(self, bg, fg, entry_bg, button_bg, trough_bg, scrollbar_bg, disabled_bg, disabled_fg, hyperlink_fg):
-        self.bg=bg
-        self.fg=fg
-        self.entry_bg=entry_bg
-        self.button_bg=button_bg
-        self.trough_bg=trough_bg
-        self.scrollbar_bg=scrollbar_bg
-        self.disabled_bg=disabled_bg
-        self.disabled_fg=disabled_fg
-        self.hyperlink_fg=hyperlink_fg
+        self.BG=bg
+        self.FG=fg
+        self.ENTRY_BG=entry_bg
+        self.BUTTON_BG=button_bg
+        self.TROUGH_BG=trough_bg
+        self.SCROLLBAR_BG=scrollbar_bg
+        self.DISABLED_BG=disabled_bg
+        self.DISABLED_FG=disabled_fg
+        self.HYPERLINK_FG=hyperlink_fg
 
     # Generally, I just want these human readable functions to be re-used:
     def get_background_color(self):
         """General background color of an element"""
-        return self.bg
+        return self.BG
 
     def get_foreground_color(self):
         """Usually refers to the text color"""
-        return self.fg
+        return self.FG
 
     def get_entry_background_color(self):
         """The background color of input boxes"""
-        return self.entry_bg
+        return self.ENTRY_BG
 
     def get_button_background_color(self):
         """The background color of buttons"""
-        return self.entry_bg
+        return self.BUTTON_BG
 
     def get_trough_background_color(self):
         """The background color of the scroll box"""
-        return self.trough_bg
+        return self.TROUGH_BG
 
     def get_scrollbar_background_color(self):
         """The color of the scrollbar itself"""
-        return self.scrollbar_bg
+        return self.SCROLLBAR_BG
 
     def get_disabled_background_color(self):
         """Use for any element that's disabled"""
-        return self.disabled_bg
+        return self.DISABLED_BG
 
     def get_disabled_foreground_color(self):
         """Use for any element that's disabled"""
-        return self.disabled_fg
+        return self.DISABLED_FG
 
     def get_hyperlink_foreground_color(self):
         """Hyperlink blue needs to different shades for each mode"""
-        return self.hyperlink_fg
+        return self.HYPERLINK_FG
 
 class DarkMode(Colors):
 
@@ -65,7 +68,7 @@ class DarkMode(Colors):
         self.bg="#26242f"
         self.fg='#d8d4cf'
         self.entry_bg="#262525"
-        self.button_bg="#d9d9d9"
+        self.button_bg="#262525"
         self.trough_bg="#84828c"
         self.scrollbar_bg="#735a9b"
         self.disabled_bg="#444444"

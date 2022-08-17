@@ -99,19 +99,6 @@ class Config:
 
         self.save() if sections_values_list else None
 
-    def print_entire_config_for_verification(self):
-        for section in self.file.sections():
-            print(f"[{section}]")
-            for item in self.file.items(section):
-                print(f"{item[0]} = {item[1]}")
-            print(f"")
-
-    def print_specific_section_items_for_verification(self, section_name: str):
-        print(f"[{section_name}]")
-        for item in self.file[section_name].items():
-            print(f"{item[0]} = {item[1]}")
-        print(f"")
-
     def _return_read_config(self):
         """Retrieve your parsed configuration file
 
@@ -126,6 +113,19 @@ class Config:
             return config
         else:
             return None
+
+    def print_entire_config_for_verification(self):
+        for section in self.file.sections():
+            print(f"[{section}]")
+            for item in self.file.items(section):
+                print(f"{item[0]} = {item[1]}")
+            print(f"")
+
+    def print_specific_section_items_for_verification(self, section_name: str):
+        print(f"[{section_name}]")
+        for item in self.file[section_name].items():
+            print(f"{item[0]} = {item[1]}")
+        print(f"")
 
     def _get_full_path_to_config(self):
         """The path to the .ini that keeps track of monitor brightness levels and theme preference

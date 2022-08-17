@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
 configutilities = configutils.Config()
 configfile = configutilities.get_configuration_file()
-preferences = preferences.Preferences(configfile)
+preferences = preferences.Preferences()
 
 def save_monitor_config(self, monitor: str, brightness: str):
     # TODO: where do I abstract this function? It's not a preference.
@@ -66,9 +66,12 @@ class Gui():
 
         # Main interface vars:
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
-        self.global_brightness_var = tk.StringVar()
+        self.global_brightness_var = tk.StringVar(value='100')
         self.brightness_vars = [tk.StringVar(
-            value=preferences.get_brightness(self.monitors[i]))
+            value=utils.convert_xrandr_brightness_to_int(
+                configfile['brightnesses'][self.monitors[i]].lower() if configfile else '100'
+                )
+            )
             for i, brightness in enumerate(self.brightnesses)
         ]
 
@@ -332,7 +335,7 @@ class Gui():
         label_theme = tk.Label(preferences_window, text='Theme:')
         label_theme.grid(row=0, column=0, padx=4, pady=4, sticky=tk.W)
 
-        all_themes = preferences.get_all_available_themes()
+        all_themes = utils.get_all_available_themes()
         theme_select = tk.OptionMenu(preferences_window, self.theme, *all_themes, command=self._theme_handler_callback)
         theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 

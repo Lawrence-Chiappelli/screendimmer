@@ -1,4 +1,5 @@
 from decimal import *
+import colors
 
 def convert_xrandr_brightness_to_int(brightness_val: str):
     """Convert the raw xrandr brightness value to a human readable integer.
@@ -39,3 +40,15 @@ def convert_converted_brightness_to_xrandr(brightness_val: str):
         raise ValueError("Brightness should be between 1 and 100 - inclusive.")
 
     return str(Decimal(float(brightness_val) / 100))[0:4]
+
+def get_all_available_themes():
+    """Get all available themes by parsing the classnames
+
+    @return (list): A list of all theme class objects
+    Basically every class in colors.py that is not Colors()
+    (so DarkMode(), LightMode(), etc)
+    """
+
+    class_names = [member for member in dir(colors)[1:] if not member.startswith("__")]
+    all_themes = [getattr(colors, class_name)() for class_name in class_names]
+    return all_themes
