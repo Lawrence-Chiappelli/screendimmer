@@ -44,18 +44,14 @@ if __name__ == '__main__':
     Any exit behaviors are handling on the WM_DELETE_WINDOW
     protocol handler. See gui.py.
     """
-    # TODO: clear config on exit
     # TODO: position window to tray
     # TODO: outclicking window minimizes it
     # TODO: tray icon
     # TODO: right click on tray icon opens window
-    # TODO: new email for feedback
 
-    # TODO: scrollwheel usable on brightness scrollbars (on highlight over and select)
-    # TODO: arrow keys usable on brightness scrollbars (on highlight over and selected)
     # TODO: rewrite config file for production, add, commit, push, then add to .gitignore
     # TODO: console messages for specific configuration calls
 
-    print("Done")
+    print("Main loop terminated")
 else:
     print("This should be the main module")

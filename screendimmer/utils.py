@@ -21,6 +21,7 @@ def convert_xrandr_brightness_to_int(brightness_val: str):
     if float(brightness_val) < 1.0:
         brightness_val = "{:.2f}".format(float(brightness_val))
 
+    # TODO: fix rounding error?
     return int(Decimal(brightness_val).shift(2))
 
 def convert_converted_brightness_to_xrandr(brightness_val: str):
@@ -36,10 +37,10 @@ def convert_converted_brightness_to_xrandr(brightness_val: str):
     if not type(brightness_val) is str:
         raise TypeError("Only strings allowed. Note that values retrieved from TK spinners/scales are strings.")
 
-    if not int(brightness_val) > -1 and int(brightness_val) < 101:
-        raise ValueError("Brightness should be between 1 and 100 - inclusive.")
+    if int(brightness_val) > 100 or int(brightness_val) < 0:
+        raise ValueError(f"Your brightness {brightness_val} should be between 1 and 100 - inclusive.")
 
-    return str(Decimal(float(brightness_val) / 100))[0:4]
+    return str(Decimal(float(brightness_val) / 100))[0:4] if int(brightness_val) < 100 else '1.0'
 
 def get_all_available_themes():
     """Get all available themes by parsing the classnames

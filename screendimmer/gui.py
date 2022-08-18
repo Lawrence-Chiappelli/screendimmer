@@ -228,7 +228,11 @@ class Gui():
                 showvalue=False
             )
             scroller.grid(row=2, column=i, sticky=tk.S)
+            scroller.bind('<Button-4>', self._handle_mousewheel_callback)
+            scroller.bind('<Button-5>', self._handle_mousewheel_callback)
             self._scrollers.append(scroller)
+
+        self._scrollers
 
         if len(self.monitors) > 1:
             # Apply the global scroller if we have more than 1 monitor
@@ -484,3 +488,16 @@ class Gui():
         except Exception as e:
             print(f"Exception caught terminating the loop:\n{e}\n\nPlease consider\
             reporting this upstream:\nhttps://github.com/lawrence-chiappelli/screendimmer/issues")
+
+    def _handle_mousewheel_callback(self, event):
+        mouse_wheel_up = event.num == 4
+        mouse_wheel_down = event.num == 5
+
+        index = self._scrollers.index(event.widget)
+        var = self.brightness_vars[index]
+        brightness_value = int(var.get())
+
+        if mouse_wheel_up and brightness_value < 100:
+            var.set(str(brightness_value + 1))
+        elif mouse_wheel_down and brightness_value > 0:
+            var.set(str(brightness_value - 1))
