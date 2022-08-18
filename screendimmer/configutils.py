@@ -10,7 +10,8 @@ class Config:
         file_name='config.ini',
         pkg_name='screendimmer',
         in_production=True,
-        get_none_if_not_found=True
+        get_none_if_not_found=True,
+        print_console_feedback=True
     ):
         """Initialize the configuration FILE using needed parameters.
         Do NOT initalize with keys/values in constructor.
@@ -19,12 +20,15 @@ class Config:
         @param pkg_name (str): Part of the path, according to Linux file placement conventions (see code)
         @param in_production (bool): Set this to False if you want to test locally and have your config
         file installed in the production path, otherwise this really doesn't matter, keep as True
-        @param continue_if_not_found (bool): Continue the program normally if True
+        @param get_none_if_not_found (bool): Continue the program normally if True
+        @param print_console_feedback (bool): If you need to import the config in more than 1 module,
+        you can optionally set this to False to keep the console clean of duplicate messages
         """
         self._file_name = file_name
         self._pkg_name = pkg_name
         self._in_production = in_production
         self._get_none_if_not_found = get_none_if_not_found
+        self._print_console_feedback = print_console_feedback
         self._path_to_config = self._get_full_path_to_config()
 
         self.file = self._return_read_config()
@@ -137,16 +141,17 @@ class Config:
         absolute_path_production = f'/etc/{self._pkg_name}/{self._file_name}'
         root_path_development = f"{self._file_name}"
         up_one_path_development = f'../{self._file_name}'
+        full_path = None
 
         if path.exists(absolute_path_production) and self._in_production:
-            print(f"✓ - In production envionment, {self._file_name} found at {absolute_path_production}")
-            return absolute_path_production
+            feedback_for_user = f"✓ - In production envionment, {self._file_name} found at {absolute_path_production}"
+            full_path = absolute_path_production
         elif path.exists(root_path_development):
-            print(f"✓ - In development envionment, {self._file_name} found at ./{root_path_development}")
-            return root_path_development
+            feedback_for_user = f"✓ - In development envionment, {self._file_name} found at ./{root_path_development}"
+            full_path = root_path_development
         elif path.exists(up_one_path_development):
-            print(f"✓ - In development envionment, {self._file_name} found at {up_one_path_development}")
-            return up_one_path_development
+            feedback_for_user = f"✓ - In development envionment, {self._file_name} found at {up_one_path_development}"
+            full_path = up_one_path_development
         else:
             feedback_for_user = f"Unable to find the configuration file {self._file_name}.\
             I attempted to look for the file in the following places:\n \
@@ -154,10 +159,14 @@ class Config:
             Maybe the file was moved or deleted?"
 
             if self._get_none_if_not_found:
-                print(feedback_for_user)
-                return None
+                full_path = None
             else:
                 raise FileNotFoundError(feedback_for_user)
+
+        if self._print_console_feedback:
+            print(feedback_for_user)
+
+        return full_path
 
 if __name__ == '__main__':
     print(f"This should be an imported module")

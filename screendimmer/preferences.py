@@ -2,12 +2,12 @@ import utils
 import colors
 import configutils
 
-configutilities = configutils.Config()
+config_interface = configutils.Config(print_console_feedback=False)
 
 class Preferences:
 
     def __init__(self):
-        self._config = configutilities.get_configuration_file()
+        self._config = config_interface.get_configuration_file()
         self.theme = self._set_theme()  # Set the CLASS object, not the STR
         self.save_on_exit = self._set_save_on_exit()
         self.restore_on_exit = self._set_restore_on_exit()
@@ -53,21 +53,21 @@ class Preferences:
     def save_new_theme(self, theme_class):
         if self._config:
             self._config['color']['theme'] = theme_class.__str__()
-            configutilities.save()
+            config_interface.save()
 
         self.theme = theme_class
 
     def apply_save_on_exit(self, selected_value: int):
         if self._config:
             self._config['preferences']['save_on_exit'] = str(bool(selected_value))
-            configutilities.save()
+            config_interface.save()
 
         self.save_on_exit = selected_value
 
     def apply_restore_on_exit(self, selected_value: int):
         if self._config:
             self._config['preferences']['restore_on_exit'] = str(bool(selected_value))
-            configutilities.save()
+            config_interface.save()
 
         self.restore_on_exit = selected_value
 

@@ -19,7 +19,7 @@ extra/tk     8.6.12-1       4.79 MiB
 """
 
 preferences = preferences.Preferences()
-config_interface = configutils.Config()
+config_interface = configutils.Config(print_console_feedback=False)
 config_file = config_interface.get_configuration_file()
 
 if __name__ == "__main__":

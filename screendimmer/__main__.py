@@ -50,8 +50,6 @@ if __name__ == '__main__':
     # TODO: right click on tray icon opens window
 
     # TODO: rewrite config file for production, add, commit, push, then add to .gitignore
-    # TODO: console messages for specific configuration calls
-
     print("Main loop terminated")
 else:
     print("This should be the main module")
