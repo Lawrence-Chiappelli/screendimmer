@@ -246,6 +246,8 @@ class Gui():
             )
             global_scroller.set(100)  # So that users start scrolling with the max brightness level
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
+            global_scroller.bind('<Button-4>', self._handle_mousewheel_global_callback)
+            global_scroller.bind('<Button-5>', self._handle_mousewheel_global_callback)
             self._global_scroller = global_scroller
 
     """
@@ -495,9 +497,21 @@ class Gui():
 
         index = self._scrollers.index(event.widget)
         var = self.brightness_vars[index]
-        brightness_value = int(var.get())
+        brightness_value = var.get()
 
         if mouse_wheel_up:
-            var.set(str(brightness_value + 1))
+            var.set(str( int(brightness_value) + 1) )
         elif mouse_wheel_down:
-            var.set(str(brightness_value - 1))
+            var.set(str( int(brightness_value) - 1) )
+
+    def _handle_mousewheel_global_callback(self, event):
+        mouse_wheel_up = event.num == 4
+        mouse_wheel_down = event.num == 5
+
+        var = self.global_brightness_var
+        brightness_value = self.global_brightness_var.get()
+
+        if mouse_wheel_up:
+            var.set(str( int(brightness_value) + 1) )
+        elif mouse_wheel_down:
+            var.set(str( int(brightness_value) - 1) )

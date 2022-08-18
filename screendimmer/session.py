@@ -35,28 +35,6 @@ class Session():
             ))
         }
 
-    def increment_monitor_brightness(self, monitor_name: str):
-        """Increment a specified monitor's brightness by 10%.
-
-        @param monitor_name (str): Full string of the monitor name
-        @return (None): None
-        """
-
-        current_brightness = self.setup[monitor_name]
-        next_brightness_level = str(float(current_brightness) + 0.1)
-        xrandr.set_brightness(monitor_name, next_brightness_level)
-
-    def decrement_monitor_brightness(self, monitor_name: str):
-        """Increment a specified monitor's brightness by 10%.
-
-        @param monitor_name (str): Full string of the monitor name
-        @return (None): None
-        """
-
-        current_brightness = self.setup[monitor_name]
-        next_brightness_level = str(float(current_brightness) - 0.1)
-        xrandr.set_brightness(monitor_name, next_brightness_level)
-
     def get_monitors(self):
         return self.monitors
 
@@ -70,9 +48,6 @@ class Session():
         self.monitors.append('TEST-1')
         self.resolutions.append('1920x1080')
         self.brightnesses.append('0.8')
-
-    def consult_config_for_monitors(self):
-        pass
 
     def __str__(self):
         return f"Your setup: {self.setup}"
