@@ -497,7 +497,7 @@ class Gui():
         var = self.brightness_vars[index]
         brightness_value = int(var.get())
 
-        if mouse_wheel_up and brightness_value < 100:
+        if mouse_wheel_up:
             var.set(str(brightness_value + 1))
-        elif mouse_wheel_down and brightness_value > 0:
+        elif mouse_wheel_down:
             var.set(str(brightness_value - 1))

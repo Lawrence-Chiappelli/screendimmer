@@ -41,8 +41,8 @@ if __name__ == '__main__':
     At this point, the mainloop has terminated and we no longer
     have access to the GUI.
 
-    Any exit behaviors are handling on the WM_DELETE_WINDOW
-    protocol handler. See gui.py.
+    Any exit behaviors are handles on the WM_DELETE_WINDOW protocol
+    handler. See gui.py.
     """
     # TODO: position window to tray
     # TODO: outclicking window minimizes it
