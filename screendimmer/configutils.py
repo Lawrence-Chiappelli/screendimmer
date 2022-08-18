@@ -153,15 +153,14 @@ class Config:
             feedback_for_user = f"✓ - In development envionment, {self._file_name} found at {up_one_path_development}"
             full_path = up_one_path_development
         else:
-            feedback_for_user = f"Unable to find the configuration file {self._file_name}.\
-            I attempted to look for the file in the following places:\n \
-            {absolute_path_production}\n{root_path_development}\n{up_one_path_developer}\n \
-            Maybe the file was moved or deleted?"
+            feedback_for_user = f"Unable to find the configuration file '{self._file_name}'!\nI attempted to look for the file in the following places:\n\t{absolute_path_production}\n\t{root_path_development}\n\t{up_one_path_development}\nMaybe the file was moved or deleted?"
 
             if self._get_none_if_not_found:
+                # Your responsibility to ensure this is handled correctly
                 full_path = None
             else:
-                raise FileNotFoundError(feedback_for_user)
+                print(feedback_for_user)
+                raise FileNotFoundError("\n\nIf you're seeing this error, please report this issue upstream. It's likely that support for no config file is in development.\nA temporary solution would be to manually copy and paste the config file from GitHub into one of the above directories.")
 
         if self._print_console_feedback:
             print(feedback_for_user)

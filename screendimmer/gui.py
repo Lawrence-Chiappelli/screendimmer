@@ -488,8 +488,7 @@ class Gui():
             save_brightnesses_to_config() if preferences.get_save_on_exit() else None
             restore_brightnesses_to_max() if preferences.get_restore_on_exit() else None
         except Exception as e:
-            print(f"Exception caught terminating the loop:\n{e}\n\nPlease consider\
-            reporting this upstream:\nhttps://github.com/lawrence-chiappelli/screendimmer/issues")
+            print(f"Exception caught terminating the loop, unable to execute your preferences.\nException message: \"{e}\"\nIt's likely the configuration file is missing.\nPlease consider reporting this upstream: https://github.com/lawrence-chiappelli/screendimmer/issues")
 
     def _handle_mousewheel_callback(self, event):
         mouse_wheel_up = event.num == 4

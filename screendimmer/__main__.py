@@ -15,15 +15,21 @@ if __name__ == '__main__':
     config_interface = configutils.Config()
     config_file = config_interface.get_configuration_file()
 
+    if config_file is None:
+        print(f"ERROR! No configuration file was found, but the basic features should still work.")
+        print(f"I wrote this program to support no/missing config file to the best of my ability")
+
     def initalize_configuration_with_values():
         """Initialize configuration values from generated session"""
-        values_to_initialize_config = [{'brightnesses': (monitors[i].lower(), '1.0')} for i in range(len(monitors))]
-        config_interface.initialize_config_with_values(values_to_initialize_config)
+        if config_file:
+            values_to_initialize_config = [{'brightnesses': (monitors[i].lower(), '1.0')} for i in range(len(monitors))]
+            config_interface.initialize_config_with_values(values_to_initialize_config)
 
     def apply_monitor_brightness_from_configuration_values():
         """Apply brightness values from configuration file - these could be default or user-saved"""
-        config_brightness_values = [config_file['brightnesses'][monitors[i]] for i in range(len(monitors))]
-        [xrandr.set_brightness(monitors[i], config_brightness_values[i]) for i in range(len(config_brightness_values))]
+        if config_file:
+            config_brightness_values = [config_file['brightnesses'][monitors[i]] for i in range(len(monitors))]
+            [xrandr.set_brightness(monitors[i], config_brightness_values[i]) for i in range(len(config_brightness_values))]
 
     initalize_configuration_with_values()
     apply_monitor_brightness_from_configuration_values()
