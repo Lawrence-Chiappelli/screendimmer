@@ -8,20 +8,25 @@ import utils
 if __name__ == '__main__':
     sesh = session.Session()
     sesh.append_temporary_test_data()
-    print(sesh)
     monitors = sesh.get_monitors()
     resolutions = sesh.get_resolutions()
     brightnesses = sesh.get_brightnesses()
 
-    # Initialize configuration values from generated session:
-    configutilities = configutils.Config()
-    values_to_initialize_config = [{'brightnesses': (monitors[i].lower(), '1.0')} for i in range(len(monitors))]
-    configutilities.initialize_config_with_values(values_to_initialize_config)
+    config_interface = configutils.Config()
+    config_file = config_interface.get_configuration_file()
 
-    # Apply monitor brightnesses from configuration file values:
-    configfile = configutilities.get_configuration_file()
-    config_brightness_values = [configfile['brightnesses'][monitors[i]] for i in range(len(monitors))]
-    [xrandr.set_brightness(monitors[i], config_brightness_values[i]) for i in range(len(config_brightness_values))]
+    def initalize_configuration_with_values():
+        """Initialize configuration values from generated session"""
+        values_to_initialize_config = [{'brightnesses': (monitors[i].lower(), '1.0')} for i in range(len(monitors))]
+        config_interface.initialize_config_with_values(values_to_initialize_config)
+
+    def apply_monitor_brightness_from_configuration_values():
+        """Apply brightness values from configuration file - these could be default or user-saved"""
+        config_brightness_values = [config_file['brightnesses'][monitors[i]] for i in range(len(monitors))]
+        [xrandr.set_brightness(monitors[i], config_brightness_values[i]) for i in range(len(config_brightness_values))]
+
+    initalize_configuration_with_values()
+    apply_monitor_brightness_from_configuration_values()
 
     tray = gui.Gui(
         monitors,
@@ -32,21 +37,25 @@ if __name__ == '__main__':
     tray.construct_gui()
     tray.start()
 
-    # When program is exited or closed, consult configuration for user's preferences:
-    preferences = preferences.Preferences()
+    """
+    At this point, the mainloop has terminated and we no longer
+    have access to the GUI.
 
-    # Saving monitor brightnesses to config (default is yes)
-    if preferences.get_save_on_exit():
-        for i in range(len(monitors)):
-            monitor = monitors[i].lower()
-            brightness = utils.convert_converted_brightness_to_xrandr(tray.brightness_vars[i].get())
-            configfile['brightnesses'][monitor] = brightness
-            configutilities.save()
-        pass  # TODO: clear config on exit?
+    Any exit behaviors are handling on the WM_DELETE_WINDOW
+    protocol handler. See gui.py.
+    """
+    # TODO: clear config on exit
+    # TODO: position window to tray
+    # TODO: outclicking window minimizes it
+    # TODO: tray icon
+    # TODO: right click on tray icon opens window
+    # TODO: new email for feedback
 
-    # Restore brightnesses when the application exists (default is yes)
-    if preferences.get_restore_on_exit():
-        for monitor in monitors:
-            xrandr.set_brightness(monitor, '1.0')
+    # TODO: scrollwheel usable on brightness scrollbars (on highlight over and select)
+    # TODO: arrow keys usable on brightness scrollbars (on highlight over and selected)
+    # TODO: rewrite config file for production, add, commit, push, then add to .gitignore
+    # TODO: console messages for specific configuration calls
 
     print("Done")
+else:
+    print("This should be the main module")

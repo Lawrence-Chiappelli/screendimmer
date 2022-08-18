@@ -1,0 +1,6 @@
+FIRST_NAME = 'Lawrence'
+LAST_NAME = 'Chiappelli'
+FULL_NAME = f'{FIRST_NAME} {LAST_NAME}'
+EMAIL = f'{FIRST_NAME.lower()}{LAST_NAME.lower()}/github@simplelogin.co'
+GITHUB_LINK_REPO = f'https://github.com/{FIRST_NAME.lower()}-{LAST_NAME.lower()}/screendimmer'
+GITHUB_LINK_ISSUES = f'{GITHUB_LINK_REPO}/issues'

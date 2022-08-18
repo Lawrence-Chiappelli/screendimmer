@@ -6,6 +6,7 @@ import xrandr
 import colors
 import configutils
 import preferences
+import constants
 
 from tkinter import messagebox
 from functools import partial
@@ -17,31 +18,13 @@ extra/tcl    8.6.12-3       6.76 MiB
 extra/tk     8.6.12-1       4.79 MiB
 """
 
+preferences = preferences.Preferences()
+config_interface = configutils.Config()
+config_file = config_interface.get_configuration_file()
+
 if __name__ == "__main__":
     print("This should be an imported module")
     quit()
-
-
-configutilities = configutils.Config()
-configfile = configutilities.get_configuration_file()
-preferences = preferences.Preferences()
-
-def save_monitor_config(self, monitor: str, brightness: str):
-    # TODO: where do I abstract this function? It's not a preference.
-    if configfile:
-        if brightness.isnumeric():
-            brightness = utils.convert_converted_brightness_to_xrandr(brightness)
-        configfile['brightnesses'][monitor.lower()] = brightness
-        configutilities.save()
-
-
-def get_brightness(self, monitor: str):
-    # TODO: same with the above
-    if configfile:
-        brightness_value = configfile['brightnesses'][monitor]
-        return brightness_value
-    else:
-        return '1.0'
 
 
 class Gui():
@@ -57,6 +40,7 @@ class Gui():
         """
 
         self.root = tk.Tk()
+        self.root.protocol("WM_DELETE_WINDOW", self._handle_close_callback)
 
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
@@ -69,7 +53,7 @@ class Gui():
         self.global_brightness_var = tk.StringVar(value='100')
         self.brightness_vars = [tk.StringVar(
             value=utils.convert_xrandr_brightness_to_int(
-                configfile['brightnesses'][self.monitors[i]].lower() if configfile else '100'
+                config_file['brightnesses'][self.monitors[i]].lower() if config_file else '100'
                 )
             )
             for i, brightness in enumerate(self.brightnesses)
@@ -279,7 +263,7 @@ class Gui():
         image.grid(row=0, column=0, sticky=tk.W, padx=10, pady=10)
 
         # Copyright:
-        copyright_label = tk.Label(about_window, text=f"© 2021-{current_year} Lawrence Chiappelli. All Rights Reserved.",
+        copyright_label = tk.Label(about_window, text=f"© 2021-{current_year} {constants.FULL_NAME}. All Rights Reserved.",
             font=10,
             justify=tk.LEFT,
         )
@@ -293,12 +277,12 @@ class Gui():
         )
         github_label.grid(row=1, column=1, sticky=tk.W, pady=(0, 20))
         github_label.bind("<Button-1>", lambda e:
-            openurl("https://github.com/Lawrence-Chiappelli/screendimmer")
+            openurl(constants.GITHUB_LINK_REPO)
         )
 
         # Contact:
         # TODO: can't copy and paste this label, may want to use tk.Text() intead
-        contact_label = tk.Label(about_window, text=f"Contact: lawrencechip@protonmail.com",
+        contact_label = tk.Label(about_window, text=f"Contact: {constants.EMAIL}",
             font=10,
             justify=tk.LEFT,
         )
@@ -469,3 +453,34 @@ class Gui():
 
     def _restore_on_exit_handler_callback(self):
         preferences.apply_restore_on_exit(self.restore_on_exit_var.get())
+
+    def _handle_close_callback(self):
+        self.root.destroy()
+
+        """
+        After the mainloop has been terminated / destroyed, let's
+        consult the user's preferences and apply any applicable
+        exit behaviors.
+        """
+
+        def save_brightnesses_to_config():
+            """"Saving monitor brightnesses to config (default is enabled)"""
+            for i in range(len(self.monitors)):
+                monitor = self.monitors[i].lower()
+                brightness = utils.convert_converted_brightness_to_xrandr(
+                    self.brightness_vars[i].get()
+                )
+                config_file['brightnesses'][monitor] = brightness
+                config_interface.save()
+
+        def restore_brightnesses_to_max():
+            """Restore brightnesses when the application exists (default is enabled)"""
+            for monitor in self.monitors:
+                xrandr.set_brightness(monitor, '1.0')
+
+        try:
+            save_brightnesses_to_config() if preferences.get_save_on_exit() else None
+            restore_brightnesses_to_max() if preferences.get_restore_on_exit() else None
+        except Exception as e:
+            print(f"Exception caught terminating the loop:\n{e}\n\nPlease consider\
+            reporting this upstream:\nhttps://github.com/lawrence-chiappelli/screendimmer/issues")
