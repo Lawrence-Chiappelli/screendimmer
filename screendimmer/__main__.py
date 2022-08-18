@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     if config_file is None:
         print(f"ERROR! No configuration file was found, but the basic features should still work.")
-        print(f"I wrote this program to support no/missing config file to the best of my ability")
+        print(f"I wrote this program to support no/missing config file to the best of my ability.")
 
     def initalize_configuration_with_values():
         """Initialize configuration values from generated session"""
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     # TODO: tray icon
     # TODO: right click on tray icon opens window
 
+    # TODO: support for missing sections in configuration file
     # TODO: rewrite config file for production, add, commit, push, then add to .gitignore
     print("Main loop terminated")
 else:

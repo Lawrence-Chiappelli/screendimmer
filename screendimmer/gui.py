@@ -498,10 +498,11 @@ class Gui():
         var = self.brightness_vars[index]
         brightness_value = var.get()
 
-        if mouse_wheel_up:
-            var.set(str( int(brightness_value) + 1) )
-        elif mouse_wheel_down:
-            var.set(str( int(brightness_value) - 1) )
+        if self.toggle_vars[index].get() == 1:
+            if mouse_wheel_up:
+                var.set(str( int(brightness_value) + 1) )
+            elif mouse_wheel_down:
+                var.set(str( int(brightness_value) - 1) )
 
     def _handle_mousewheel_global_callback(self, event):
         mouse_wheel_up = event.num == 4
