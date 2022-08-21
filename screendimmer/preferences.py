@@ -45,7 +45,7 @@ class Preferences:
         return False
 
     def is_dark_mode_enabled(self):
-        if self.theme == colors.DarkMode().__str__():
+        if self.theme.__str__() == colors.DarkMode().__str__():
             return True
         else:
             return False

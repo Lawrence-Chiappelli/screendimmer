@@ -71,6 +71,7 @@ class Gui():
         self._inputs = []
         self._scrollers = []
         self._global_scroller = None
+        # self._bar_height = self._get_bar_height()
 
         """New windows"""
         self.menu = self._construct_menu_bar()
@@ -82,19 +83,53 @@ class Gui():
 
     def construct_gui(self):
         """Construct the GUI with data, elements, callbacks and theme"""
-        self._configure_metadata()
+        self._configure_window_properties()
         self._populate_monitor_toggles()
         self._populate_brightness_inputs()
         self._populate_brightness_scrollers()
         self._attach_brightness_callbacks()
         self._apply_theme()
+        self._configure_window_size()
+
+    def _configure_window_size(self):
+
+        def print_geometry():
+            print(f"Geometry after: {self.root.winfo_geometry()}\n{self.root.winfo_reqwidth()}x{self.root.winfo_reqheight()}")
+
+        def place_to_corner():
+            """
+            Window width: NOT including side borders
+            Window height: not including window bar NOR file menu!
+
+            Size / coordinates should be:
+            369 331 2191 1079
+            """
+
+            self.root.update()  # <--- needed to get the window's width and height
+            window_width, window_height = self.root.winfo_width(), self.root.winfo_height()
+            window_res_x, window_res_y = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+
+            file_menu_height = self.menu.winfo_reqheight()
+            window_bar_height = 30
+
+            taskbar_on_top = False
+
+            if taskbar_on_top:
+                y_pos = window_bar_height
+            else:
+                y_pos = window_res_y - window_height - window_bar_height
+
+            x_pos = window_res_x - window_width
+            self.root.geometry(f"{window_width}x{window_height}+{x_pos}+{y_pos}")
+
+        place_to_corner()
 
     """
     Various data configurators:
     """
-    def _configure_metadata(self):
-        self.root.attributes('-type', 'dialog')
+    def _configure_window_properties(self):
         self.root.title("Screen Dimmer")
+        self.root.attributes('-type', 'dialog')
 
     def _apply_theme(self):
         theme = preferences.get_theme()
@@ -139,7 +174,8 @@ class Gui():
                 background=bg,
                 foreground=fg if checkbox_state == 1 else disabled_fg,
                 highlightbackground=bg,
-                troughcolor=trough_bg if checkbox_state == 1 else disabled_bg
+                troughcolor=trough_bg if checkbox_state == 1 else disabled_bg,
+                activebackground=scrollbar_bg
             )
 
 
@@ -212,6 +248,8 @@ class Gui():
                 to=100
             )
             input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10, pady=(0, 20))
+            input_box.bind('<Button-4>', self._handle_mousewheel_callback)
+            input_box.bind('<Button-5>', self._handle_mousewheel_callback)
             self._inputs.append(input_box)
 
     def _populate_brightness_scrollers(self):
@@ -494,7 +532,11 @@ class Gui():
         mouse_wheel_up = event.num == 4
         mouse_wheel_down = event.num == 5
 
-        index = self._scrollers.index(event.widget)
+        if type(event.widget) == type(tk.Scale()):
+            index = self._scrollers.index(event.widget)
+        else:
+            index = self._inputs.index(event.widget)
+
         var = self.brightness_vars[index]
         brightness_value = var.get()
 
