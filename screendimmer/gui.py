@@ -41,6 +41,8 @@ class Gui():
 
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self._handle_close_callback)
+        self.root.title("Screen Dimmer")
+        self.root.attributes('-type', 'dialog')
 
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
@@ -67,11 +69,10 @@ class Gui():
         """Tkinter GUI elements"""
 
         # Main interface elements:
-        self._toggles = []
-        self._inputs = []
-        self._scrollers = []
-        self._global_scroller = None
-        # self._bar_height = self._get_bar_height()
+        self._toggles = self._populate_monitor_toggles()
+        self._inputs = self._populate_brightness_inputs()
+        self._scrollers = self._populate_brightness_scrollers()
+        self._global_scroller = self._populate_global_scroller()
 
         """New windows"""
         self.menu = self._construct_menu_bar()
@@ -83,10 +84,6 @@ class Gui():
 
     def construct_gui(self):
         """Construct the GUI with data, elements, callbacks and theme"""
-        self._configure_window_properties()
-        self._populate_monitor_toggles()
-        self._populate_brightness_inputs()
-        self._populate_brightness_scrollers()
         self._attach_brightness_callbacks()
         self._apply_theme()
         self._configure_window_size()
@@ -127,10 +124,6 @@ class Gui():
     """
     Various data configurators:
     """
-    def _configure_window_properties(self):
-        self.root.title("Screen Dimmer")
-        self.root.attributes('-type', 'dialog')
-
     def _apply_theme(self):
         theme = preferences.get_theme()
 
@@ -226,6 +219,7 @@ class Gui():
     def _populate_monitor_toggles(self):
         """Populate the GUI with checkbox toggles. Information should be parsed."""
 
+        toggles = []
         for i in range(len(self.monitors)):
             toggle = tk.Checkbutton(self.root, text=f" {self.monitors[i]} ({self.resolutions[i]})",
                 variable=self.toggle_vars[i],
@@ -237,11 +231,13 @@ class Gui():
                 )
             )
             toggle.grid(row=0, column=i, sticky=tk.E+tk.W, padx=10, pady=(10,0))
-            self._toggles.append(toggle)
+            toggles.append(toggle)
+        return toggles
 
     def _populate_brightness_inputs(self):
         """Populate the GUI with input boxes accepting new brightness level integers."""
 
+        inputs = []
         for i, brightness_var in enumerate(self.brightness_vars):
             input_box = tk.Spinbox(self.root, textvariable=brightness_var,
                 from_=0,
@@ -250,11 +246,13 @@ class Gui():
             input_box.grid(row=1, column=i, sticky=tk.E+tk.W, padx=10, pady=(0, 20))
             input_box.bind('<Button-4>', self._handle_mousewheel_callback)
             input_box.bind('<Button-5>', self._handle_mousewheel_callback)
-            self._inputs.append(input_box)
+            inputs.append(input_box)
+        return inputs
 
     def _populate_brightness_scrollers(self):
         """Populate the GUI with vertical scrollbars."""
 
+        scrollers = []
         for i, brightness_var in enumerate(self.brightness_vars):
             scroller = tk.Scale(self.root, variable=brightness_var,
                 from_=100,
@@ -268,12 +266,14 @@ class Gui():
             scroller.grid(row=2, column=i, sticky=tk.S)
             scroller.bind('<Button-4>', self._handle_mousewheel_callback)
             scroller.bind('<Button-5>', self._handle_mousewheel_callback)
-            self._scrollers.append(scroller)
+            scrollers.append(scroller)
 
-        self._scrollers
+        return scrollers
+
+    def _populate_global_scroller(self):
+        """Apply the global scroller, IFF we have more than 1 monitor"""
 
         if len(self.monitors) > 1:
-            # Apply the global scroller if we have more than 1 monitor
             global_scroller = tk.Scale(self.root, variable=self.global_brightness_var,
                 from_=0,
                 to=100,
@@ -286,7 +286,9 @@ class Gui():
             global_scroller.grid(row=3, columnspan=len(self.monitors), sticky=tk.E+tk.W)
             global_scroller.bind('<Button-4>', self._handle_mousewheel_global_callback)
             global_scroller.bind('<Button-5>', self._handle_mousewheel_global_callback)
-            self._global_scroller = global_scroller
+            return global_scroller
+        else:
+            return None
 
     """
     About window:
