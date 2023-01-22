@@ -8,7 +8,7 @@ class Preferences:
         self.config_file = config_file  # Unless I NEED custom config functions I wrote, this is probably good enough
         self.theme = self._set_theme()  # Set the CLASS object, not the STR
         self.save_on_exit = self._set_save_on_exit()
-        self.restore_on_exit = self._set_restore_on_exit()
+        self.retain_on_exit = self._retain_on_exit()
 
     def get_theme(self):
         return self.theme
@@ -16,8 +16,8 @@ class Preferences:
     def is_save_on_exit(self):
         return self.save_on_exit
 
-    def is_restore_on_exit(self):
-        return self.restore_on_exit
+    def is_retain_on_exit(self):
+        return self.retain_on_exit
 
     def _set_theme(self):
         if self.config_file:
@@ -35,7 +35,7 @@ class Preferences:
 
         return False
 
-    def _set_restore_on_exit(self):
+    def _retain_on_exit(self):
         if self.config_file:
             if eval(self.config_file['preferences']['restore_on_exit']):
                 return True
@@ -61,11 +61,11 @@ class Preferences:
 
         self.save_on_exit = selected_value
 
-    def apply_restore_on_exit(self, selected_value: int):
+    def apply_retain_on_exit(self, selected_value: int):
         if self.config_file:
             self.config_file['preferences']['restore_on_exit'] = str(bool(selected_value))
 
-        self.restore_on_exit = selected_value
+        self.retain_on_exit = selected_value
 
     def __str__(self):
         return str(self.__dict__())

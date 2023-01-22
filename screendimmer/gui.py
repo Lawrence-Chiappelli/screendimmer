@@ -61,7 +61,7 @@ class Gui():
         # Preference vars:
         self.theme = tk.StringVar(value=self.prefs.get_theme())
         self.save_on_exit_var = tk.IntVar(value=self.prefs.is_save_on_exit())
-        self.restore_on_exit_var = tk.IntVar(value=self.prefs.is_restore_on_exit())
+        self.retain_on_exit_var = tk.IntVar(value=self.prefs.is_retain_on_exit())
 
         """Tkinter GUI elements"""
 
@@ -389,7 +389,7 @@ class Gui():
         theme_select.grid(row=0, column=1, padx=4, pady=4, sticky=tk.E)
 
         # Save on exit:
-        checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save monitor config on exit",
+        checkbox_save_on_exit = tk.Checkbutton(preferences_window, text="Save changes on exit",
             variable=self.save_on_exit_var,
             command=self._save_on_exit_handler_callback,
             onvalue=1,
@@ -403,13 +403,13 @@ class Gui():
         )
 
         # Restore on exit:
-        checkbox_restore_on_exit = tk.Checkbutton(preferences_window, text="Set brightnesses to 100% on exit",
-            variable=self.restore_on_exit_var,
-            command=self._restore_on_exit_handler_callback,
+        checkbox_retain_on_exit = tk.Checkbutton(preferences_window, text="Use new brightnesses on exit",
+            variable=self.retain_on_exit_var,
+            command=self._retain_on_exit_handler_callback,
             onvalue=1,
             offvalue=0
         )
-        checkbox_restore_on_exit.grid(row=2, column=0,
+        checkbox_retain_on_exit.grid(row=2, column=0,
             columnspan=2,
             sticky=tk.W,
             padx=(0, 4),
@@ -517,8 +517,8 @@ class Gui():
     def _save_on_exit_handler_callback(self):
         self.prefs.apply_save_on_exit(self.save_on_exit_var.get())
 
-    def _restore_on_exit_handler_callback(self):
-        self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
+    def _retain_on_exit_handler_callback(self):
+        self.prefs.apply_retain_on_exit(self.retain_on_exit_var.get())
 
     def _handle_close_callback(self):
         """
@@ -542,16 +542,15 @@ class Gui():
 
         def restore_brightnesses_to_max():
             """Restore brightnesses when the application exists (default is enabled)"""
-            for monitor in self.monitors:
-                xrandr.set_brightness(monitor, '1.0')
+            if not self.prefs.is_retain_on_exit():
+                for monitor in self.monitors:
+                    xrandr.set_brightness(monitor, '1.0')
 
         self.root.destroy()
-        self.prefs.apply_save_on_exit(self.save_on_exit_var.get())
-        self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
 
         try:
             save_brightnesses_to_config()
-            restore_brightnesses_to_max() if self.prefs.is_restore_on_exit() else None
+            restore_brightnesses_to_max()
         except Exception as e:
             print(f"Error exiting the program. Unable to consult your preferences.\nException message: \"{e}\"\nIt's likely the configuration file is missing.\nPlease consider reporting this upstream: https://github.com/lawrence-chiappelli/screendimmer/issues")
 
