@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     monitors = sesh.get_monitors()
     resolutions = sesh.get_resolutions()
-    brightnesses = None  # Assigned via config or session IFF config file is not detected
+    brightnesses = None
 
     if config.file:
         brightnesses = config.get_all_values_from_section_as_list(section_name='brightnesses')
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         brightnesses = sesh.get_brightnesses()
         print(f"Basic features will work, but changes will not be saved.")
 
-    [xrandr.set_brightness(monitors[i], brightnesses[i]) for i in range(len(monitors))] # TODO: do I really need this for restore on exit?
+    [xrandr.set_brightness(monitors[i], brightnesses[i]) for i in range(len(monitors))]
 
     tray = gui.Gui(
         monitors=monitors,

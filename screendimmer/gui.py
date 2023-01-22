@@ -432,7 +432,7 @@ class Gui():
     def _close_preferences_window(self, *args):
         self.preferences.withdraw()
         self.root.deiconify()
-        self.config.save()  # Overkill to save here, but doesn't hurt in the event an exception is raised during mainloop
+        self.config.save()  # Overkill to save here, but doesn't hurt in the event an exception is raised during main GUI window
 
     """
     Callbacks:
@@ -521,8 +521,6 @@ class Gui():
         self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
 
     def _handle_close_callback(self):
-
-
         """
         After the mainloop has been terminated / destroyed, let's
         consult the user's preferences and apply any applicable
@@ -530,11 +528,15 @@ class Gui():
         """
 
         def save_brightnesses_to_config():
-            """"Saving monitor brightnesses to config (default is enabled)"""
+            """"Saving monitor brightnesses to config
+
+            If user wants to save on exit, extract current VALUES
+            Otherwise, reset back to 100.
+            """
             for i in range(len(self.monitors)):
                 monitor = self.monitors[i].lower()
                 brightness = utils.convert_converted_brightness_to_xrandr(
-                    self.brightness_vars[i].get()
+                    self.brightness_vars[i].get() if self.prefs.is_save_on_exit() else '100'
                 )
                 self.config.file['brightnesses'][monitor] = brightness
 
@@ -548,7 +550,7 @@ class Gui():
         self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
 
         try:
-            save_brightnesses_to_config() if self.prefs.is_save_on_exit() else None
+            save_brightnesses_to_config()
             restore_brightnesses_to_max() if self.prefs.is_restore_on_exit() else None
         except Exception as e:
             print(f"Error exiting the program. Unable to consult your preferences.\nException message: \"{e}\"\nIt's likely the configuration file is missing.\nPlease consider reporting this upstream: https://github.com/lawrence-chiappelli/screendimmer/issues")
