@@ -18,10 +18,6 @@ extra/tcl    8.6.12-3       6.76 MiB
 extra/tk     8.6.12-1       4.79 MiB
 """
 
-preferences = preferences.Preferences()
-config_interface = configutils.Config(print_console_feedback=False)
-config_file = config_interface.get_configuration_file()
-
 if __name__ == "__main__":
     print("This should be an imported module")
     quit()
@@ -29,7 +25,7 @@ if __name__ == "__main__":
 
 class Gui():
 
-    def __init__(self, monitors: list, resolutions: list, brightnesses: list):
+    def __init__(self, monitors: list, resolutions: list, brightnesses: list, config):
         """Initialize the GUI with predefined, easily accessible information.
 
         @param monitors (list): A list of strings of monitors, xrandr representation
@@ -38,11 +34,12 @@ class Gui():
 
         Note: keep in mind that monitors and resolutions are index adjacent / ordered.
         """
+        self.config = config
+        self.prefs = preferences.Preferences(self.config.file)
 
         self.root = tk.Tk()
         self.root.protocol("WM_DELETE_WINDOW", self._handle_close_callback)
         self.root.title("Screen Dimmer")
-        self.root.attributes('-type', 'dialog')
 
         self.monitors = [monitor for monitor in monitors]
         self.resolutions = [resolution for resolution in resolutions]
@@ -50,21 +47,21 @@ class Gui():
 
         """Tkinter PyVars"""
 
-        # Main interface vars:
+        # Main interface vars
         self.toggle_vars = [tk.IntVar(value=1) for _ in range(len(self.monitors))]
         self.global_brightness_var = tk.StringVar(value='100')
         self.brightness_vars = [tk.StringVar(
             value=utils.convert_xrandr_brightness_to_int(
-                config_file['brightnesses'][self.monitors[i]].lower() if config_file else '100'
+                    self.config.file['brightnesses'][self.monitors[i]].lower() if self.config.file else '100'
                 )
             )
             for i, brightness in enumerate(self.brightnesses)
         ]
 
         # Preference vars:
-        self.theme = tk.StringVar(value=preferences.get_theme())
-        self.save_on_exit_var = tk.IntVar(value=preferences.get_save_on_exit())
-        self.restore_on_exit_var = tk.IntVar(value=preferences.get_restore_on_exit())
+        self.theme = tk.StringVar(value=self.prefs.get_theme())
+        self.save_on_exit_var = tk.IntVar(value=self.prefs.is_save_on_exit())
+        self.restore_on_exit_var = tk.IntVar(value=self.prefs.is_restore_on_exit())
 
         """Tkinter GUI elements"""
 
@@ -83,15 +80,16 @@ class Gui():
         self.root.mainloop()
 
     def construct_gui(self):
-        """Construct the GUI with data, elements, callbacks and theme"""
+        """Construct the callbacks, colors and window size"""
         self._attach_brightness_callbacks()
         self._apply_theme()
         self._configure_window_size()
 
-    def _configure_window_size(self):
+    def debug_geometry(self):
+        print(f"Geometry after: {self.root.winfo_geometry()}\n{self.root.winfo_reqwidth()}x{self.root.winfo_reqheight()}")
 
-        def print_geometry():
-            print(f"Geometry after: {self.root.winfo_geometry()}\n{self.root.winfo_reqwidth()}x{self.root.winfo_reqheight()}")
+    def _configure_window_size(self):
+        self.root.attributes('-type', 'dialog')
 
         def place_to_corner():
             """
@@ -101,15 +99,16 @@ class Gui():
             Size / coordinates should be:
             369 331 2191 1079
             """
-
             self.root.update()  # <--- needed to get the window's width and height
+            bar_height = self.root.winfo_rooty()
+            print(bar_height)
             window_width, window_height = self.root.winfo_width(), self.root.winfo_height()
             window_res_x, window_res_y = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
 
             file_menu_height = self.menu.winfo_reqheight()
             window_bar_height = 30
 
-            taskbar_on_top = False
+            taskbar_on_top = True
 
             if taskbar_on_top:
                 y_pos = window_bar_height
@@ -117,15 +116,34 @@ class Gui():
                 y_pos = window_res_y - window_height - window_bar_height
 
             x_pos = window_res_x - window_width
+
+            print(self.root.winfo_reqheight())
+
             self.root.geometry(f"{window_width}x{window_height}+{x_pos}+{y_pos}")
 
-        place_to_corner()
+        # place_to_corner()
+
+    def _get_bar_height(self):
+        from sys import platform
+        offset_y = 0
+        if platform in ('win32', 'darwin'):
+            import ctypes
+            try: # >= win 8.1
+                ctypes.windll.shcore.SetProcessDpiAwareness(2)
+            except: # win 8.0 or less
+                ctypes.windll.user32.SetProcessDPIAware()
+            offset_y = int(self.root.geometry().rsplit('+', 1)[-1])
+            print(offset_y)
+
+        print(self.root.winfo_rooty())
+        bar_height = self.root.winfo_rooty() - offset_y
+        return bar_height
 
     """
     Various data configurators:
     """
     def _apply_theme(self):
-        theme = preferences.get_theme()
+        theme = self.prefs.get_theme()
 
         bg = theme.get_background_color()
         fg = theme.get_foreground_color()
@@ -158,8 +176,8 @@ class Gui():
             self._inputs[index].configure(background=entry_bg, foreground=fg,
                 highlightbackground=bg,
                 buttonbackground=button_bg,
-                disabledbackground=disabled_bg if preferences.is_dark_mode_enabled() else None,
-                disabledforeground=disabled_fg if preferences.is_dark_mode_enabled() else None
+                disabledbackground=disabled_bg if self.prefs.is_dark_mode_enabled() else None,
+                disabledforeground=disabled_fg if self.prefs.is_dark_mode_enabled() else None
             )
 
             checkbox_state = self.toggle_vars[index].get()
@@ -207,7 +225,7 @@ class Gui():
 
         file = tk.Menu(menu, tearoff=0)
         file.add_command(label='Preferences', command=self._open_preferences_window)
-        file.add_command(label='Quit', command=self.root.destroy)
+        file.add_command(label='Quit', command=self._handle_close_callback)
         help = tk.Menu(menu, tearoff=0)
         help.add_command(label='About', command=self._open_about_window)
 
@@ -253,6 +271,7 @@ class Gui():
         """Populate the GUI with vertical scrollbars."""
 
         scrollers = []
+        only_one_monitor = len(self.brightness_vars) == 1
         for i, brightness_var in enumerate(self.brightness_vars):
             scroller = tk.Scale(self.root, variable=brightness_var,
                 from_=100,
@@ -261,9 +280,9 @@ class Gui():
                 length=200,
                 takefocus=1,
                 tickinterval=10,
-                showvalue=False
+                showvalue=False,
             )
-            scroller.grid(row=2, column=i, sticky=tk.S)
+            scroller.grid(row=2, column=i, sticky=tk.S, pady=(0,20 if only_one_monitor else 0))
             scroller.bind('<Button-4>', self._handle_mousewheel_callback)
             scroller.bind('<Button-5>', self._handle_mousewheel_callback)
             scrollers.append(scroller)
@@ -413,6 +432,7 @@ class Gui():
     def _close_preferences_window(self, *args):
         self.preferences.withdraw()
         self.root.deiconify()
+        self.config.save()  # Overkill to save here, but doesn't hurt in the event an exception is raised during mainloop
 
     """
     Callbacks:
@@ -491,17 +511,17 @@ class Gui():
         self._apply_theme()
 
     def _theme_handler_callback(self, selected_theme_as_class):
-        preferences.save_new_theme(selected_theme_as_class)
+        self.prefs.save_new_theme(selected_theme_as_class)
         self._apply_theme()
 
     def _save_on_exit_handler_callback(self):
-        preferences.apply_save_on_exit(self.save_on_exit_var.get())
+        self.prefs.apply_save_on_exit(self.save_on_exit_var.get())
 
     def _restore_on_exit_handler_callback(self):
-        preferences.apply_restore_on_exit(self.restore_on_exit_var.get())
+        self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
 
     def _handle_close_callback(self):
-        self.root.destroy()
+
 
         """
         After the mainloop has been terminated / destroyed, let's
@@ -516,19 +536,22 @@ class Gui():
                 brightness = utils.convert_converted_brightness_to_xrandr(
                     self.brightness_vars[i].get()
                 )
-                config_file['brightnesses'][monitor] = brightness
-                config_interface.save()
+                self.config.file['brightnesses'][monitor] = brightness
 
         def restore_brightnesses_to_max():
             """Restore brightnesses when the application exists (default is enabled)"""
             for monitor in self.monitors:
                 xrandr.set_brightness(monitor, '1.0')
 
+        self.root.destroy()
+        self.prefs.apply_save_on_exit(self.save_on_exit_var.get())
+        self.prefs.apply_restore_on_exit(self.restore_on_exit_var.get())
+
         try:
-            save_brightnesses_to_config() if preferences.get_save_on_exit() else None
-            restore_brightnesses_to_max() if preferences.get_restore_on_exit() else None
+            save_brightnesses_to_config() if self.prefs.is_save_on_exit() else None
+            restore_brightnesses_to_max() if self.prefs.is_restore_on_exit() else None
         except Exception as e:
-            print(f"Exception caught terminating the loop, unable to execute your preferences.\nException message: \"{e}\"\nIt's likely the configuration file is missing.\nPlease consider reporting this upstream: https://github.com/lawrence-chiappelli/screendimmer/issues")
+            print(f"Error exiting the program. Unable to consult your preferences.\nException message: \"{e}\"\nIt's likely the configuration file is missing.\nPlease consider reporting this upstream: https://github.com/lawrence-chiappelli/screendimmer/issues")
 
     def _handle_mousewheel_callback(self, event):
         mouse_wheel_up = event.num == 4

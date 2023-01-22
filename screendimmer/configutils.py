@@ -1,6 +1,6 @@
 import configparser
 
-from os import path
+from os import path, stat
 
 
 class Config:
@@ -11,7 +11,8 @@ class Config:
         pkg_name='screendimmer',
         in_production=True,
         get_none_if_not_found=True,
-        print_console_feedback=True
+        print_console_feedback=True,
+        data=[],
     ):
         """Initialize the configuration FILE using needed parameters.
         Do NOT initalize with keys/values in constructor.
@@ -23,6 +24,7 @@ class Config:
         @param get_none_if_not_found (bool): Continue the program normally if True
         @param print_console_feedback (bool): If you need to import the config in more than 1 module,
         you can optionally set this to False to keep the console clean of duplicate messages
+        @param create_file_if_first_run=False:
         """
         self._file_name = file_name
         self._pkg_name = pkg_name
@@ -30,6 +32,7 @@ class Config:
         self._get_none_if_not_found = get_none_if_not_found
         self._print_console_feedback = print_console_feedback
         self._path_to_config = self._get_full_path_to_config()
+        self._data = data if data else None
 
         self.file = self._return_read_config()
 
@@ -37,71 +40,37 @@ class Config:
         with open(self._path_to_config, 'w') as new_changes:
             self.file.write(new_changes)
 
-    def get_configuration_file(self):
-        return self.file
+    def _config_file_is_empty(self):
+        stat(self._path_to_config).st_size == 0
 
-    def initialize_config_with_values(self, sections_values_list: list):
-        """Initialize the configuration with new values.
+    def get_all_values_from_section_as_list(self, section_name='brightnesses', fallback_value='1.0'):
+        """Get all VALUES (not KEYS) from a section/category
 
-        Note:
-            1) You MUST have [sectionnames] already in your config file!
-            2) The sections_values_list must be in the correct format
-
-        Justification:
-        The assumption here is that an end-user is launching your program
-        for the first time, and your program is written such that your config
-        file cannot contain any keys/values *until* you launch the program
-        first and retrieve them.
-
-        In such a scenario, you may want to use an *automated* function to
-        populate with values - contingent on having the information ready
-        for passing into this function.
-
-        (Nothing is stopping you from doing so manually - but, if you get into
-        that habit, it's very hard to determine where that starts and ends,
-        leading to a confusing and unmaintainable order of events.
-        That's just my opinion.)
-
-        This function makes checks for section name existence, key name existence,
-        and key value existence.
-        Read below to see how the program responds to a combination of any of
-        the above scenarios. It probably will do what you think it does.
-
-        @param sections_values_list (list): Within this list contains
-        the following dictionaries:
-        {section_name: (section_key, default_value)}
-
-        @return (None): Nothing to return
-        @raise KeyError: If the user failed to have the section name prepared
-        beforehand, abort the program.
+        @param category (str): The name of the config category
+        @return (list): A list of values as strings
         """
-        for item in sections_values_list:
-            for section_name, value_tuple in item.items():
-                section_key, default_value = value_tuple[0], value_tuple[1]
-                """
-                Note: it is YOUR responsibility to ensure config values types are correct!
-                Remember, we are only initializing values, we are NOT checking for value type correctness.
-                """
-                if self.file.has_section(section_name):
-                    if self.file.has_option(section_name, section_key):
-                        # If the section NAME and KEY exists, we can run into 2 possible scenarios:
-                        #   1) We are missing a value on the key, so assign a new value using the user's default value
-                        #   2) We have the value on the key already, in which case, continue
-                        existing_value = self.file[section_name][section_key]
-                        if existing_value:
-                            continue
-                        else:
-                            print(f"Found a missing value! Assigning with default {default_value}")
-                            self.file[section_name][section_key] = default_value
-                    else:
-                        # Create the section with the default value.
-                        # In this case, there's no existing value, so just assign a default value.
-                        print(f"Creating new config key/value for [{section_name}]: {section_key} = {default_value}")
-                        self.file[section_name][section_key] = default_value
-                else:
-                    raise KeyError(f"Missing section [{section_name}]. This must be manually defined first\n!")
 
-        self.save() if sections_values_list else None
+        return [value or fallback_value for value in self.file[section_name].values()]
+
+    def save_section_keys_with_values(self, keys: list, values: list, section='brightnesses'):
+        """Save config section keys with values.
+
+        1) Assume indices are adjacent.
+        2) Have your keys/values ready and processed.
+        3) Meant for sections with multiple keys - just access the
+        config directly if you want to save a single section/key value.
+        """
+
+        if self.file:
+            for i in range(len(keys)):
+                if self.file.has_option(section, keys[i]):
+                    self.file[section][keys[i]] = values[i]
+                else:
+                    print(f"Warning: missing section/key in config: {section}/{key}")
+
+            self.save()
+        else:
+            raise FileNotFoundError("Config file must be read or parsed before using this function.")
 
     def _return_read_config(self):
         """Retrieve your parsed configuration file
@@ -153,7 +122,7 @@ class Config:
             feedback_for_user = f"✓ - In development envionment, {self._file_name} found at {up_one_path_development}"
             full_path = up_one_path_development
         else:
-            feedback_for_user = f"Unable to find the configuration file '{self._file_name}'!\nI attempted to look for the file in the following places:\n\t{absolute_path_production}\n\t{root_path_development}\n\t{up_one_path_development}\nMaybe the file was moved or deleted?"
+            feedback_for_user = f"Unable to find the configuration file '{self._file_name}'!\nThis program attempted to look for the file in the following places:\n\t{absolute_path_production}\n\t{root_path_development}\n\t{up_one_path_development}\nMaybe the file was moved or deleted?"
 
             if self._get_none_if_not_found:
                 # Your responsibility to ensure this is handled correctly

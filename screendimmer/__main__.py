@@ -6,38 +6,28 @@ import preferences
 import utils
 
 if __name__ == '__main__':
-    sesh = session.Session()
-    sesh.append_temporary_test_data()
+    config = configutils.Config() # Important that all modules using a config share the same memory address, so pass this where possible
+    prefs = preferences.Preferences(config_file=config.file)
+    sesh = session.Session(append_test_data=False)
+
     monitors = sesh.get_monitors()
     resolutions = sesh.get_resolutions()
-    brightnesses = sesh.get_brightnesses()
+    brightnesses = None  # Assigned via config or session IFF config file is not detected
 
-    config_interface = configutils.Config()
-    config_file = config_interface.get_configuration_file()
+    if config.file:
+        brightnesses = config.get_all_values_from_section_as_list(section_name='brightnesses')
+        config.save_section_keys_with_values(section='brightnesses', keys=monitors, values=brightnesses)  # As a fallback, overwrite brightness values if we are missing any (unlikely scenario)
+    else:
+        brightnesses = sesh.get_brightnesses()
+        print(f"Basic features will work, but changes will not be saved.")
 
-    if config_file is None:
-        print(f"ERROR! No configuration file was found, but the basic features should still work.")
-        print(f"I wrote this program to support no/missing config file to the best of my ability.")
-
-    def initalize_configuration_with_values():
-        """Initialize configuration values from generated session"""
-        if config_file:
-            values_to_initialize_config = [{'brightnesses': (monitors[i].lower(), '1.0')} for i in range(len(monitors))]
-            config_interface.initialize_config_with_values(values_to_initialize_config)
-
-    def apply_monitor_brightness_from_configuration_values():
-        """Apply brightness values from configuration file - these could be default or user-saved"""
-        if config_file:
-            config_brightness_values = [config_file['brightnesses'][monitors[i]] for i in range(len(monitors))]
-            [xrandr.set_brightness(monitors[i], config_brightness_values[i]) for i in range(len(config_brightness_values))]
-
-    initalize_configuration_with_values()
-    apply_monitor_brightness_from_configuration_values()
+    [xrandr.set_brightness(monitors[i], brightnesses[i]) for i in range(len(monitors))] # TODO: do I really need this for restore on exit?
 
     tray = gui.Gui(
-        monitors,
-        resolutions,
-        brightnesses
+        monitors=monitors,
+        resolutions=resolutions,
+        brightnesses=brightnesses,
+        config=config
     )
 
     tray.construct_gui()
@@ -50,13 +40,17 @@ if __name__ == '__main__':
     Any exit behaviors are handles on the WM_DELETE_WINDOW protocol
     handler. See gui.py.
     """
-    # TODO: position window to tray
-    # TODO: outclicking window minimizes it
-    # TODO: tray icon
-    # TODO: right click on tray icon opens window
 
-    # TODO: support for missing sections in configuration file
-    # TODO: rewrite config file for production, add, commit, push, then add to .gitignore
-    print("Main loop terminated")
+    config.save()
+
+    # TODO: tray icon
+    # TODO: position window to tray
+    # TODO: outclicking window to minimize it
+    # TODO: right click on tray icon to open window
+
+    # TODO: support for better config intialization
+    # TODO: better naming of preferences
+    # TODO: save (en/dis)abled monitors for "Save monitor config on exit?"
+    print("Successfully exited program! (Mainloop terminated)")
 else:
     print("This should be the main module")

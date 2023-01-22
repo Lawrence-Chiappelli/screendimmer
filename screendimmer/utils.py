@@ -53,3 +53,34 @@ def get_all_available_themes():
     class_names = [member for member in dir(colors)[1:] if not member.startswith("__")]
     all_themes = [getattr(colors, class_name)() for class_name in class_names]
     return all_themes
+
+def compute_and_get_taskbar_height():
+    """Tkinter does not offer native functionality to return a user's taskbar height.
+    As a workaround, create a temporary window.
+    """
+
+    import tkinter as tk
+    from sys import platform
+
+
+    class App(tk.Tk):
+        def __init__(self):
+            super().__init__()
+            tk.Frame(self).update_idletasks()
+
+            offset_y = 0
+            if platform in ('win32', 'darwin'):
+                import ctypes
+                try: # >= win 8.1
+                    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+                except: # win 8.0 or less
+                    ctypes.windll.user32.SetProcessDPIAware()
+                offset_y = int(self.geometry().rsplit('+', 1)[-1])
+
+            bar_height = self.winfo_rooty() - offset_y
+            print(self.wm_maxsize())
+            print(f'Height: {bar_height}\nPlatform: {platform}')
+            self.destroy()
+
+    if __name__ == '__main__':
+        app = App()

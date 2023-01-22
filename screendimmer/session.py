@@ -2,11 +2,12 @@ import xrandr
 
 class Session():
 
-    def __init__(self):
+    def __init__(self, append_test_data=False):
         self.setup = self._generate_setup()
         self.monitors = [m[0] for m in self.setup.values()]
         self.brightnesses = [b[1] for b in self.setup.values()]
         self.resolutions = [r[2] for r in self.setup.values()]
+        self.append_temporary_test_data() if append_test_data else None
 
     def _generate_setup(self):
         """Determine the user's setup. Once per function call.
@@ -36,6 +37,11 @@ class Session():
         }
 
     def get_monitors(self):
+        """[summary]
+        @return (list): of strings containing monitor names
+        Example: ['DisplayPort-2', 'HDMI-1']
+        """
+
         return self.monitors
 
     def get_brightnesses(self):

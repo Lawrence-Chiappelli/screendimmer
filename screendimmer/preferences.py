@@ -2,12 +2,10 @@ import utils
 import colors
 import configutils
 
-config_interface = configutils.Config(print_console_feedback=False)
-
 class Preferences:
 
-    def __init__(self):
-        self._config = config_interface.get_configuration_file()
+    def __init__(self, config_file):
+        self.config_file = config_file  # Unless I NEED custom config functions I wrote, this is probably good enough
         self.theme = self._set_theme()  # Set the CLASS object, not the STR
         self.save_on_exit = self._set_save_on_exit()
         self.restore_on_exit = self._set_restore_on_exit()
@@ -15,15 +13,15 @@ class Preferences:
     def get_theme(self):
         return self.theme
 
-    def get_save_on_exit(self):
+    def is_save_on_exit(self):
         return self.save_on_exit
 
-    def get_restore_on_exit(self):
+    def is_restore_on_exit(self):
         return self.restore_on_exit
 
     def _set_theme(self):
-        if self._config:
-            theme_value = self._config['color']['theme']
+        if self.config_file:
+            theme_value = self.config_file['color']['theme']
             for theme in utils.get_all_available_themes():
                 if theme.__str__() == theme_value:
                     return theme
@@ -31,15 +29,15 @@ class Preferences:
         return colors.DarkMode()
 
     def _set_save_on_exit(self):
-        if self._config:
-            if eval(self._config['preferences']['save_on_exit']):
+        if self.config_file:
+            if eval(self.config_file['preferences']['save_on_exit']):
                 return True
 
         return False
 
     def _set_restore_on_exit(self):
-        if self._config:
-            if eval(self._config['preferences']['restore_on_exit']):
+        if self.config_file:
+            if eval(self.config_file['preferences']['restore_on_exit']):
                 return True
 
         return False
@@ -51,23 +49,21 @@ class Preferences:
             return False
 
     def save_new_theme(self, theme_class):
-        if self._config:
-            self._config['color']['theme'] = theme_class.__str__()
-            config_interface.save()
+        if self.config_file:
+            self.config_file['color']['theme'] = theme_class.__str__()
 
         self.theme = theme_class
 
     def apply_save_on_exit(self, selected_value: int):
-        if self._config:
-            self._config['preferences']['save_on_exit'] = str(bool(selected_value))
-            config_interface.save()
+        # TODO: better name for this - *what* is being applied *to*?
+        if self.config_file:
+            self.config_file['preferences']['save_on_exit'] = str(bool(selected_value))
 
         self.save_on_exit = selected_value
 
     def apply_restore_on_exit(self, selected_value: int):
-        if self._config:
-            self._config['preferences']['restore_on_exit'] = str(bool(selected_value))
-            config_interface.save()
+        if self.config_file:
+            self.config_file['preferences']['restore_on_exit'] = str(bool(selected_value))
 
         self.restore_on_exit = selected_value
 
